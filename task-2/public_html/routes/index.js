@@ -14,6 +14,26 @@ function getTitle(title) {
 }
 
 /**
+ * Generate the navbar.
+ *
+ * @param {String} active
+ * @returns {Array}
+ */
+function getNavbar(active) {
+  var points = [
+    { href: "/", text: "Home" },
+    { href: "/about", text: "About" },
+    { href: "/user", text: "User" }
+  ];
+
+  for (var i = 0; i < points.length; i++) {
+    points[i].active = points[i].text === active || points[i].href === active ? ' class="active"' : "";
+  }
+
+  return points;
+}
+
+/**
  * Render index page.
  *
  * @param {http.IncomingMessage} req
@@ -28,57 +48,9 @@ exports.index = function routesIndex(req, res) {
     // Regenerate session and store user from previous session (if exists).
     res.session.regenerate(function (error) {
       req.session.user = user;
-      res.render("index", { title: getTitle(), user: user });
+      res.render("index", { title: getTitle(), navbar: getNavbar("/"), user: user });
     });
   } catch (e) {
-    res.render("index", { title: getTitle() });
+    res.render("signin", { title: getTitle("Signin") });
   }
-};
-
-/**
- * Render user profile page if logged in.
- *
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse} res
- * @returns {void}
- */
-exports.user = function routesUser(req, res) {
-  res.render("user", { title: getTitle("User") });
-};
-
-/**
- * Render login page.
- *
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse} res
- * @returns {void}
- */
-exports.login = function routesLogin(req, res) {
-  req.session.user = req.body.user;
-  //res.json({ error: "" });
-  res.render("login", { title: getTitle("Login") });
-};
-
-/**
- * Render logout page.
- *
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse} res
- * @returns {void}
- */
-exports.logout = function routesLogout(req, res) {
-  req.session.destroy();
-  //res.redirect("/");
-  res.render("logout", { title: getTitle("Logout") });
-};
-
-/**
- * Render forgot password page.
- *
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse} res
- * @returns {void}
- */
-exports.password = function routesPassword(req, res) {
-  res.render("password", { title: getTitle("Password") });
 };

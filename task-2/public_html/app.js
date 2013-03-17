@@ -45,10 +45,6 @@ app.configure("development", function () {
 });
 
 app.get("/", routes.index);
-app.get("/user", routes.user);
-app.get("/user/login", routes.login);
-app.get("/user/logout", routes.logout);
-app.get("/user/password", routes.password);
 
 sessionSockets.on("connection", function (error, socket, session) {
   socket.on("chat", function (data) {
