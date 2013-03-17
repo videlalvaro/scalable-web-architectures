@@ -3,6 +3,7 @@
  * @author Richard Fussenegger
  */
 var express = require("express");
+var partials = require("express-partials");
 var routes = require("./routes");
 var http = require("http");
 var path = require("path");
@@ -30,7 +31,7 @@ app.configure(function () {
   app.set("port", process.env.PORT || 3000);
   app.set("views", __dirname + "/views");
   app.set("view engine", "ejs");
-  //app.use(express.favicon());
+  app.use(partials());
   app.use(express.logger("dev"));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
