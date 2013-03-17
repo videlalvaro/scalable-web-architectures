@@ -34,6 +34,23 @@ function getNavbar(active) {
 }
 
 /**
+ * Render EJS view.
+ *
+ * @param {http.ServerResponse} res
+ * @param {String} view
+ * @param {Object} options
+ * @returns {void}
+ */
+function render(res, view, options) {
+  res.render(view, {
+    view: view,
+    title: getTitle(options.title | null),
+    navbar: getNavbar(options.active | null),
+    user: options.user | null
+  });
+}
+
+/**
  * Render index page.
  *
  * @param {http.IncomingMessage} req
@@ -48,9 +65,9 @@ exports.index = function routesIndex(req, res) {
     // Regenerate session and store user from previous session (if exists).
     res.session.regenerate(function (error) {
       req.session.user = user;
-      res.render("index", { title: getTitle(), navbar: getNavbar("/"), user: user });
+      render(res, "index", { active: "/", user: user });
     });
   } catch (e) {
-    res.render("signin", { title: getTitle("Signin") });
+    render(res, "signin", { title: "Signin" });
   }
 };
