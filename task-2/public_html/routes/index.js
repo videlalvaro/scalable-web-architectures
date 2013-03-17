@@ -16,12 +16,14 @@ var serverName = process.env.VCAP_APP_HOST ? process.env.VCAP_APP_HOST + ":" + p
  * @returns {void}
  */
 exports.index = function (request, response) {
-  // Save user from previous session (if exists).
-  var user = request.session.user;
+  if (request.session.user) {
+    // Save user from previous session (if exists).
+    var user = request.session.user;
 
-  // Regenerate session and store user from previous session (if exists).
-  request.session.regenerate(function (error) {
-    request.session.user = user;
-    response.render("index", { title: "Express", server: serverName, user: user });
-  });
+    // Regenerate session and store user from previous session (if exists).
+    request.session.regenerate(function (error) {
+      request.session.user = user;
+      response.render("index", { title: "Express", server: serverName, user: user });
+    });
+  }
 };
