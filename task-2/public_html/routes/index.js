@@ -10,7 +10,7 @@
  * @returns {String}
  */
 function getTitle(title) {
-  return title ? title + " | " : "" + "AMQPChat";
+  return (title ? title + " | " : "") + "AMQPChat";
 }
 
 /**
