@@ -9,21 +9,33 @@
 var serverName = process.env.VCAP_APP_HOST ? process.env.VCAP_APP_HOST + ":" + process.env.VCAP_APP_PORT : "localhost:3000";
 
 /**
- * Restore user sessions.
+ * Render the index page.
  *
- * @param {type} request
- * @param {type} response
+ * @param {http.IncomingMessage} request
+ * @param {http.ServerResponse} response
  * @returns {void}
  */
 exports.index = function (request, response) {
-  if (request.session && request.session.user) {
+  /**
+   * Render the index page.
+   *
+   * @param {type} user
+   * @function
+   */
+  var respond = function (user) {
+    response.render("index", { title: "AMQPChat", server: serverName, user: user });
+  };
+
+  try {
     // Save user from previous session (if exists).
     var user = request.session.user;
 
     // Regenerate session and store user from previous session (if exists).
     request.session.regenerate(function (error) {
       request.session.user = user;
-      response.render("index", { title: "Express", server: serverName, user: user });
+      respond(user);
     });
+  } catch (e) {
+    respond();
   }
 };
