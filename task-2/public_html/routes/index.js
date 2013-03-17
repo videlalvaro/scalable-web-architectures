@@ -4,38 +4,84 @@
  */
 
 /**
- * Get the server name from predefined variables if we are running the app on CloudFoundry, otherwise use localhost.
- */
-var serverName = process.env.VCAP_APP_HOST ? process.env.VCAP_APP_HOST + ":" + process.env.VCAP_APP_PORT : "localhost:3000";
-
-/**
- * Render the index page.
+ * Generate full title for usage in <code>&lt;title&gt;</code> element.
  *
- * @param {http.IncomingMessage} request
- * @param {http.ServerResponse} response
- * @returns {void}
+ * @param {String} title
+ * @returns {String}
  */
-exports.index = function (request, response) {
+function getTitle(title) {
+  return title ? title + " | " : "" + "AMQPChat";
+}
+
+exports = {
   /**
-   * Render the index page.
+   * Render index page.
    *
-   * @param {type} user
-   * @function
+   * @param {http.IncomingMessage} req
+   * @param {http.ServerResponse} res
+   * @returns {void}
    */
-  var respond = function (user) {
-    response.render("index", { title: "AMQPChat", server: serverName, user: user });
-  };
+  index: function routesIndex(req, res) {
+    try {
+      // Save user from previous session (if exists).
+      var user = req.session.user;
 
-  try {
-    // Save user from previous session (if exists).
-    var user = request.session.user;
+      // Regenerate session and store user from previous session (if exists).
+      res.session.regenerate(function (error) {
+        req.session.user = user;
+        res.render("index", { title: getTitle(), user: user });
+      });
+    } catch (e) {
+      res.render("index", { title: getTitle() });
+    }
+  },
 
-    // Regenerate session and store user from previous session (if exists).
-    request.session.regenerate(function (error) {
-      request.session.user = user;
-      respond(user);
-    });
-  } catch (e) {
-    respond();
+  /**
+   * Render user profile page if logged in.
+   *
+   * @param {http.IncomingMessage} req
+   * @param {http.ServerResponse} res
+   * @returns {void}
+   */
+  user: function routesUser(req, res) {
+    res.render("user", { title: getTitle("User") });
+  },
+
+  /**
+   * Render login page.
+   *
+   * @param {http.IncomingMessage} req
+   * @param {http.ServerResponse} res
+   * @returns {void}
+   */
+  login: function routesLogin(req, res) {
+    req.session.user = req.body.user;
+    //res.json({ error: "" });
+    res.render("login", { title: getTitle("Login") });
+  },
+
+  /**
+   * Render logout page.
+   *
+   * @param {http.IncomingMessage} req
+   * @param {http.ServerResponse} res
+   * @returns {void}
+   */
+  logout: function routesLogout(req, res) {
+    req.session.destroy();
+    //res.redirect("/");
+    res.render("logout", { title: getTitle("Logout") });
+  },
+
+
+  /**
+   * Render forgot password page.
+   *
+   * @param {http.IncomingMessage} req
+   * @param {http.ServerResponse} res
+   * @returns {void}
+   */
+  password: function routesPassword(req, res) {
+    res.render("password", { title: getTitle("Password") });
   }
 };

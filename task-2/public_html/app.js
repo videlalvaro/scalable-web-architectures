@@ -45,16 +45,10 @@ app.configure("development", function () {
 });
 
 app.get("/", routes.index);
-
-app.get("/logout", function (request, response) {
-  request.session.destroy();
-  response.redirect("/");
-});
-
-app.post("/user", function (request, response) {
-  request.session.user = request.body.user;
-  response.json({ error: "" });
-});
+app.get("/user", routes.user);
+app.get("/user/login", routes.login);
+app.get("/user/logout", routes.logout);
+app.get("/user/password", routes.password);
 
 sessionSockets.on("connection", function (error, socket, session) {
   socket.on("chat", function (data) {
