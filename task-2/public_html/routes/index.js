@@ -16,7 +16,7 @@ var serverName = process.env.VCAP_APP_HOST ? process.env.VCAP_APP_HOST + ":" + p
  * @returns {void}
  */
 exports.index = function (request, response) {
-  if (request.session.user) {
+  if (request.session && request.session.user) {
     // Save user from previous session (if exists).
     var user = request.session.user;
 
