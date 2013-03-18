@@ -49,22 +49,6 @@ var ejsHelper = (function EJSHelper() {
   return self;
 })();
 
-var mongodb = (function MongoDB(process, JSON) {
-  var
-    _getCredentials = function MongoDB_getCredentials() {
-      if (!_credentials && process.env.VCAP_SERVICES)  _credentials = JSON.parse(process.env.VCAP_SERVICES)['mongodb-2.0'][0]['credentials'];
-      return _credentials;
-    },
-    self = {
-      getUrl: function MongoDBgetUrl() {
-        if (!_url) _url = _getCredentials().url || 'mongodb://localhost:27017/db';
-        return _url;
-      }
-    },
-    _credentials, _url;
-  return self;
-})(process, JSON);
-
 amqp.on('ready', function () {
   chatExchange = amqp.exchange('chatExchange', { type: 'fanout' });
 });
@@ -137,22 +121,25 @@ app
       }
       return pass;
     };
-    require('mongodb').connect(mongodb.getUrl(), function (err, conn) {
-      conn.collection('users', function (err, coll) {
-        var user = {
-          name: req.body.name,
-          mail: req.body.mail,
-          pass: _genPass(),
-          ip: req.connection.remoteAddress,
-          date: new Date()
-        };
-        coll.insert(user, { safe: true }, function (err) {
-          res.writeHead(200, { 'content-type': 'application/json' });
-          res.write(JSON.stringify(user));
-          res.end('\n');
-        });
-      });
-    });
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.write(process.env.VCAP_SERVICES);
+    res.end('\n');
+//    require('mongodb').connect(mongodb.getUrl(), function (err, conn) {
+//      conn.collection('users', function (err, coll) {
+//        var user = {
+//          name: req.body.name,
+//          mail: req.body.mail,
+//          pass: _genPass(),
+//          ip: req.connection.remoteAddress,
+//          date: new Date()
+//        };
+//        coll.insert(user, { safe: true }, function (err) {
+//          res.writeHead(200, { 'content-type': 'application/json' });
+//          res.write(JSON.stringify(user));
+//          res.end('\n');
+//        });
+//      });
+//    });
   })
   .post('/user/login', function (req, res) {
     ejsHelper.render(res, 'login', { title: 'Login' });
