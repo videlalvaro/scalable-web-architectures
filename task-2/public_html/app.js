@@ -129,7 +129,7 @@ app
     }
   })
   .get('/user', function (req, res) {
-    if (req.session.user) {
+    if (req.session && req.session.user) {
       // @todo Render user profile page.
     } else {
       ejsHelper.render(res, 'login', { title: 'Login' });
