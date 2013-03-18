@@ -3,7 +3,6 @@
  * @author Richard Fussenegger
  */
 var express = require('express');
-var partials = require('express-partials');
 var http = require('http');
 var path = require('path');
 var redis = require('redis');
@@ -83,7 +82,6 @@ app
       .set('port', process.env.PORT || 3000)
       .set('views', __dirname + '/views')
       .set('view engine', 'ejs')
-      .use(partials())
       .use(cookieParser)
       .use(express.logger('dev'))
       .use(express.bodyParser())

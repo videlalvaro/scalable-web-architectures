@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "express": "*",
-    "express-partials": "*",
     "ejs": "*",
     "socket.io": "*",
     "session.socket.io": "*",
