@@ -1,15 +1,15 @@
 <div class="container">
   <form class="form-login js-visible" action="/user/login" method="post">
     <h2 class="form-login-heading">Please login</h2>
-    <input type="email" placeholder="Email address" class="input-block-level" required="required">
-    <input type="password" placeholder="Password" class="input-block-level" required="required">
+    <input type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" title="The email address you specified during registration.">
+    <input type="password" placeholder="Password" class="input-block-level" required="required" data-toggle="tooltip" title="Check your inbox, we sent the password to the email address you gave us.">
     <button type="submit" class="btn btn-large btn-primary">Login</button>
     <button id="btn-show-register" class="btn">Register</button>
   </form>
   <form class="form-register js-hidden" action="/user/register" method="post">
     <h2 class="form-register-heading">Please register</h2>
-    <input type="text" placeholder="User name" class="input-block-level" required="required">
-    <input type="email" placeholder="Email address" class="input-block-level" required="required">
+    <input type="text" placeholder="Chat name" class="input-block-level" required="required" data-toggle="tooltip" title="The name to appear in chats. Choose carefully!">
+    <input type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" title="Your email address will be used to identify you.">
     <button type="submit" class="btn btn-large btn-primary">Register</button>
     <button id="btn-show-login" class="btn">Login</button>
   </form>
