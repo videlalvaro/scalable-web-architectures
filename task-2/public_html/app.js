@@ -4,6 +4,9 @@
  */
 require('cf-autoconfig');
 
+var port = process.env.PORT || 3000;
+var host = process.env.HOST || 'localhost';
+
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -20,7 +23,6 @@ var cookieSecret = 'yDj9Fs7DaVVxZdZcuOh0';
 var cookieParser = express.cookieParser(cookieSecret);
 var SessionSocket = require('session.socket.io');
 var sessionSockets = new SessionSocket(io, sessionStore, cookieParser, 'jsessionid');
-
 var ejsHelper = (function EJSHelper() {
   var
     _projectTitle = 'AMQPChat',
@@ -49,57 +51,20 @@ var ejsHelper = (function EJSHelper() {
       }
     };
   return self;
-}());
-
-//var db = (function MySQL() {
-//  var
-//    self = {
-//      getConnection: function () {
-//        if (!_connection) {
-//          _connection = require('mysql').createConnection(_conf);
-//        }
-//        return _connection;
-//      },
-//      query: function (query, callback) {
-//        self.getConnection();
-//        _connection.connect();
-//        _connection.query(query, callback);
-//        _connection.end();
-//      }
-//    },
-//    _conf, _connection;
-//
-//  if (process && process.env) {
-//    _conf = process.env.VCAP_SERVICES['mysql-5.1'][0].credentials;
-//  } else {
-//    _conf = {
-//      host: 'localhost',
-//      port: 3306,
-//      user: 'root',
-//      password: 'keines'
-//    };
-//  }
-//
-//  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
-//
-//  return self;
-//}());
+})();
 
 amqp.on('ready', function () {
   chatExchange = amqp.exchange('chatExchange', { type: 'fanout' });
 });
 
 // Configure socket.io
-io
-  .set('transports', [ 'xhr-polling' ])
-  .set('log level', 1)
-;
+io.set('transports', [ 'xhr-polling' ]).set('log level', 1);
 
 // Configure our app and set up routes.
 app
   .configure(function () {
     this
-      .set('port', process.env.PORT || 3000)
+      .set('port', port)
       .set('views', __dirname + '/views')
       .set('view engine', 'ejs')
       .use(cookieParser)
@@ -133,7 +98,7 @@ app
     }
   })
   .post('/user/logout', function (req, res) {
-
+    res.redirect('/user');
   })
   .post('/user/register', function (req, res) {
     var _genPass = function () {
@@ -157,28 +122,10 @@ app
       }
       return pass;
     };
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.write(req);
-    res.end('\n');
-//    require('mongodb').connect(mongodb.getUrl(), function (err, conn) {
-//      conn.collection('users', function (err, coll) {
-//        var user = {
-//          name: req.body.name,
-//          mail: req.body.mail,
-//          pass: _genPass(),
-//          ip: req.connection.remoteAddress,
-//          date: new Date()
-//        };
-//        coll.insert(user, { safe: true }, function (err) {
-//          res.writeHead(200, { 'content-type': 'application/json' });
-//          res.write(JSON.stringify(user));
-//          res.end('\n');
-//        });
-//      });
-//    });
+    res.redirect('/user');
   })
   .post('/user/login', function (req, res) {
-    ejsHelper.render(res, 'login', { title: 'Login' });
+    res.redirect('/user');
   })
 ;
 
@@ -198,6 +145,6 @@ sessionSockets.on('connection', function (error, socket, session) {
   });
 });
 
-server.listen(app.get('port'), function () {
-  console.log('Express server listening on port ' + app.get('port'));
+server.listen(port, function () {
+  console.log('Express server listening on port ' + port);
 });
