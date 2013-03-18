@@ -4,11 +4,9 @@
     <div class="alert alert-error fade in"><%= message %></div>
   <% } %>
   <form class="form-login" action="/login" method="post">
-    <h2 class="form-login-heading">Please login</h2>
-    <input name="username" type="text" placeholder="Username" class="input-block-level">
-    <input name="password" type="password" placeholder="Password" class="input-block-level">
+    <h2 class="form-login-heading">Choose name</h2>
+    <input name="name" type="text" placeholder="Name" class="input-block-level">
     <button type="submit" class="btn btn-large btn-primary">Login</button>
   </form>
-  <p class="text-center">Use <em>guest</em> as username and password!</p>
 </div>
 <% include layout/footer %>

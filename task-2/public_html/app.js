@@ -24,6 +24,7 @@ var cookieParser = express.cookieParser(cookieSecret);
 var SessionSocket = require('session.socket.io');
 var sessionSockets = new SessionSocket(io, sessionStore, cookieParser, 'jsessionid');
 var message;
+var names; // Only stored in this node instance, bad, bad, bad ...
 var ejsHelper = (function EJSHelper() {
   var
     _projectTitle = 'AMQPChat',
@@ -104,9 +105,19 @@ app
     // MongoDB and MySQL fail on CloudFoundry, my guess is because the node packages (npm install) are not compatible.
     // I do not have the time to debug CloudFoundry all day. It is their responsibility to document their infrastructure
     // correctly.
-    if (req.body) {
-      message = req.body;
-      res.redirect('/user');
+    //
+    // @todo Check if name is already used by another user!
+    if (req.body && req.body.name) {
+      for (var i = 0; i < names.length; i++) {
+        if (names[i] === req.body.name) {
+          message = 'This name is already in use!';
+          res.redirect('/user');
+          return;
+        }
+      }
+      names.push(req.body.name);
+      req.session.name = req.body.name;
+      res.redirect('/');
     } else {
       message = 'Username and/or password is wrong!';
       res.redirect('/user');
