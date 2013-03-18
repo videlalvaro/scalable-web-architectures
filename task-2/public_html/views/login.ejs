@@ -1,9 +1,16 @@
 <div class="container">
-  <form class="form-login" action="/user/login" method="post">
-    <h2 class="form-login-heading">Please sign in</h2>
-    <input type="text" placeholder="Email address" class="input-block-level">
-    <input type="password" placeholder="Password" class="input-block-level">
+  <form class="form-login js-visible" action="/user/login" method="post">
+    <h2 class="form-login-heading">Please login</h2>
+    <input type="email" placeholder="Email address" class="input-block-level" required="required">
+    <input type="password" placeholder="Password" class="input-block-level" required="required">
     <button type="submit" class="btn btn-large btn-primary">Login</button>
-    <button class="btn">Register</button>
+    <button id="btn-show-register" class="btn">Register</button>
+  </form>
+  <form class="form-register js-hidden" action="/user/register" method="post">
+    <h2 class="form-register-heading">Please register</h2>
+    <input type="text" placeholder="User name" class="input-block-level" required="required">
+    <input type="email" placeholder="Email address" class="input-block-level" required="required">
+    <button type="submit" class="btn btn-large btn-primary">Register</button>
+    <button id="btn-show-login" class="btn">Login</button>
   </form>
 </div>
