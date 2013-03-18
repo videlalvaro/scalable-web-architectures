@@ -23,7 +23,7 @@ var cookieSecret = 'yDj9Fs7DaVVxZdZcuOh0';
 var cookieParser = express.cookieParser(cookieSecret);
 var SessionSocket = require('session.socket.io');
 var sessionSockets = new SessionSocket(io, sessionStore, cookieParser, 'jsessionid');
-
+var message;
 var ejsHelper = (function EJSHelper() {
   var
     _projectTitle = 'AMQPChat',
@@ -93,7 +93,8 @@ app
     }
   })
   .get('/user', function (req, res) {
-    ejsHelper.render(res, 'login', { title: 'Login' });
+    ejsHelper.render(res, 'login', { title: 'Login', message: message });
+    message = null;
   })
   .post('/logout', function (req, res) {
     res.redirect('/user');
@@ -102,9 +103,13 @@ app
     // MongoDB and MySQL fail on CloudFoundry, my guess is because the node packages (npm install) are not compatible.
     // I do not have the time to debug CloudFoundry all day. It is their responsibility to document their infrastructure
     // correctly.
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.write(req);
-    res.end('\n');
+    if (req.body.username && req.body.password) {
+      req.session.username = req.body.username;
+      res.redirect('/');
+    } else {
+      message = 'Username and/or password is wrong!';
+      res.redirect('/user');
+    }
   })
 ;
 
