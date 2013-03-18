@@ -104,9 +104,9 @@ app
     // MongoDB and MySQL fail on CloudFoundry, my guess is because the node packages (npm install) are not compatible.
     // I do not have the time to debug CloudFoundry all day. It is their responsibility to document their infrastructure
     // correctly.
-    if (req.body.username && req.body.password) {
-      req.session.username = req.body.username;
-      res.redirect('/');
+    if (req) {
+      message = JSON.stringify(req);
+      res.redirect('/user');
     } else {
       message = 'Username and/or password is wrong!';
       res.redirect('/user');
