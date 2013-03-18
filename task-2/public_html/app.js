@@ -43,6 +43,7 @@ var ejsHelper = (function EJSHelper() {
         return _navbarPoints;
       },
       render: function EJSHelperRender(res, view, options) {
+        options = options || {};
         res.render(view, {
           view: view,
           title: self.getTitle(options.title || null),
@@ -92,10 +93,10 @@ app
     }
   })
   .get('/user', function (req, res) {
-    ejsHelper.render(res, 'login');
+    ejsHelper.render(res, 'login', { title: 'Login' });
   })
   .post('/logout', function (req, res) {
-    res.redirect('/');
+    res.redirect('/user');
   })
   .post('/login', function (req, res) {
     // MongoDB and MySQL fail on CloudFoundry, my guess is because the node packages (npm install) are not compatible.
