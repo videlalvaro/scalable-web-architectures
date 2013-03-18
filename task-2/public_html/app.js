@@ -139,7 +139,7 @@ app
 
   })
   .post('/user/register', function (req, res) {
-res.writeHead(200, { 'content-type': 'text/plain' });
+res.writeHead(200, { 'content-type': 'application/json' });
 res.write(JSON.stringify(process.env.VCAP_SERVICES));
 res.end('\n');
     var _genPass = function () {
