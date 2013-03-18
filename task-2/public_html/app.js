@@ -53,33 +53,12 @@ var ejsHelper = (function EJSHelper() {
 var mongodb = (function MongoDB(process, JSON) {
   var
     _getCredentials = function MongoDB_getCredentials() {
-      if (!_credentials) {
-        if (process.env.VCAP_SERVICES) {
-          _credentials = JSON.parse(process.env.VCAP_SERVICES)['mongodb-2.0'][0]['credentials'];
-        } else {
-          _credentials = {
-            hostname: 'localhost',
-            port: 27017,
-            username: '',
-            password: '',
-            name: '',
-            db: 'db'
-          };
-        }
-      }
+      if (!_credentials && process.env.VCAP_SERVICES)  _credentials = JSON.parse(process.env.VCAP_SERVICES)['mongodb-2.0'][0]['credentials'];
       return _credentials;
     },
     self = {
       getUrl: function MongoDBgetUrl() {
-        var c;
-        if (!_url) {
-          c = _getCredentials();
-          _url = 'mongodb://';
-          if (c.username && c.password) {
-            _url += c.username + ':' + c.password + '@';
-          }
-          _url += c.hostname + ':' + c.port + '/' + c.db;
-        }
+        if (!_url) _url = _getCredentials().url || 'mongodb://localhost:27017/db';
         return _url;
       }
     },
@@ -139,9 +118,6 @@ app
 
   })
   .post('/user/register', function (req, res) {
-res.writeHead(200, { 'content-type': 'application/json' });
-res.write(JSON.stringify(process.env.VCAP_SERVICES));
-res.end('\n');
     var _genPass = function () {
       var
         chars = '',
