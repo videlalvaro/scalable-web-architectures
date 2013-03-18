@@ -49,41 +49,41 @@ var ejsHelper = (function EJSHelper() {
       }
     };
   return self;
-})();
+}());
 
-var db = (function MySQL() {
-  var
-    self = {
-      getConnection: function () {
-        if (!_connection) {
-          _connection = require('mysql').createConnection(_conf);
-        }
-        return _connection;
-      },
-      query: function (query, callback) {
-        self.getConnection();
-        _connection.connect();
-        _connection.query(query, callback);
-        _connection.end();
-      }
-    },
-    _conf, _connection;
-
-  if (process && process.env) {
-    _conf = process.env.VCAP_SERVICES['mysql-5.1'][0]['credentials'];
-  } else {
-    _conf = {
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: 'keines'
-    };
-  }
-
-  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
-
-  return self;
-})();
+//var db = (function MySQL() {
+//  var
+//    self = {
+//      getConnection: function () {
+//        if (!_connection) {
+//          _connection = require('mysql').createConnection(_conf);
+//        }
+//        return _connection;
+//      },
+//      query: function (query, callback) {
+//        self.getConnection();
+//        _connection.connect();
+//        _connection.query(query, callback);
+//        _connection.end();
+//      }
+//    },
+//    _conf, _connection;
+//
+//  if (process && process.env) {
+//    _conf = process.env.VCAP_SERVICES['mysql-5.1'][0].credentials;
+//  } else {
+//    _conf = {
+//      host: 'localhost',
+//      port: 3306,
+//      user: 'root',
+//      password: 'keines'
+//    };
+//  }
+//
+//  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
+//
+//  return self;
+//}());
 
 amqp.on('ready', function () {
   chatExchange = amqp.exchange('chatExchange', { type: 'fanout' });
