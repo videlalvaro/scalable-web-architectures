@@ -48,7 +48,8 @@ var ejsHelper = (function EJSHelper() {
           view: view,
           title: self.getTitle(options.title || null),
           navbar: self.getNavbar(options.active || null),
-          user: options.user || null
+          user: options.user || null,
+          message: options.message || null
         });
       }
     };
