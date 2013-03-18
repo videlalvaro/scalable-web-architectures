@@ -23,6 +23,7 @@ var cookieSecret = 'yDj9Fs7DaVVxZdZcuOh0';
 var cookieParser = express.cookieParser(cookieSecret);
 var SessionSocket = require('session.socket.io');
 var sessionSockets = new SessionSocket(io, sessionStore, cookieParser, 'jsessionid');
+
 var ejsHelper = (function EJSHelper() {
   var
     _projectTitle = 'AMQPChat',
@@ -90,42 +91,11 @@ app
       res.redirect('/user');
     }
   })
-  .get('/user', function (req, res) {
-    if (req.session && req.session.user) {
-      // @todo Render user profile page.
-    } else {
-      ejsHelper.render(res, 'login', { title: 'Login' });
-    }
+  .post('/logout', function (req, res) {
+    res.redirect('/');
   })
-  .post('/user/logout', function (req, res) {
-    res.redirect('/user');
-  })
-  .post('/user/register', function (req, res) {
-    var _genPass = function () {
-      var
-        chars = '',
-        length = 8,
-        pass = '',
-        countChars = 0,
-        countNums = 0,
-        rNum;
-      for (var i = 0; i < length; i++) {
-        if ((Math.floor(Math.random() * 2) === 0) && countNums < 3 || countChars >= 5) {
-          rNum = Math.floor(Math.random() * 10);
-          pass += rnum;
-          countNums++;
-        } else {
-          rNum = Math.floor(Math.random() * chars.length);
-          pass += chars.substring(rNum, rNum + 1);
-          countChars++;
-        }
-      }
-      return pass;
-    };
-    res.redirect('/user');
-  })
-  .post('/user/login', function (req, res) {
-    res.redirect('/user');
+  .post('/login', function (req, res) {
+    ejsHelper.render(res, 'login');
   })
 ;
 

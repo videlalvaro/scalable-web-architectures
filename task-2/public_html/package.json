@@ -12,11 +12,6 @@
     "session.socket.io": "*",
     "redis": "*",
     "connect-redis": "*",
-    "amqp": "*",
-    "mysql": "*",
-    "cf-autoconfig": "*"
-  },
-  "engines": {
-    "node": "0.8.x"
+    "amqp": "*"
   }
 }
