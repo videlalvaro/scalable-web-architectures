@@ -125,7 +125,7 @@ app
         ejsHelper.render(res, 'index', { active: 'Home', user: user });
       });
     } catch (e) {
-      res.redirect('/user/login');
+      res.redirect('/user');
     }
   })
   .get('/user', function (req, res) {
