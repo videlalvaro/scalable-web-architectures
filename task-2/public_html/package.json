@@ -13,6 +13,10 @@
     "redis": "*",
     "connect-redis": "*",
     "amqp": "*",
-    "mysql": "*"
+    "mysql": "*",
+    "cf-autoconfig": "*"
+  },
+  "engines": {
+    "node": "0.8.x"
   }
 }

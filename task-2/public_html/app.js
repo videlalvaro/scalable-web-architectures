@@ -2,6 +2,8 @@
  * @link https://github.com/videlalvaro/rabbitpubsub/blob/master/app.js
  * @author Richard Fussenegger
  */
+require('cf-autoconfig');
+
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -49,9 +51,8 @@ var ejsHelper = (function EJSHelper() {
   return self;
 })();
 
-var db = (function MySQL(_conf) {
+var db = (function MySQL() {
   var
-    _connection,
     self = {
       getConnection: function () {
         if (!_connection) {
@@ -65,15 +66,24 @@ var db = (function MySQL(_conf) {
         _connection.query(query, callback);
         _connection.end();
       }
+    },
+    _conf, _connection;
+
+  if (process && process.env) {
+    _conf = process.env.VCAP_SERVICES['mysql-5.1'][0]['credentials'];
+  } else {
+    _conf = {
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: 'keines'
     };
+  }
+
   self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
+
   return self;
-})(process.env.VCAP_SERVICES['mysql-5.1'][0] || {credentials: {
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: 'keines'
-}});
+})();
 
 amqp.on('ready', function () {
   chatExchange = amqp.exchange('chatExchange', { type: 'fanout' });
