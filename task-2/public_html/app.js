@@ -13,10 +13,12 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var chatExchange;
 var redisClient = redis.createClient();
-var sessionStore = new require('connect-redis')(express)({ client: redisClient });
+var RedisStore = require('connect-redis')(express);
+var sessionStore = new RedisStore({ client: redisClient });
 var cookieSecret = 'yDj9Fs7DaVVxZdZcuOh0';
 var cookieParser = express.cookieParser(cookieSecret);
-var sessionSockets = new require('session.socket.io')(io, sessionStore, cookieParser, 'jsessionid');
+var SessionSocket = require('session.socket.io');
+var sessionSockets = new SessionSocket(io, sessionStore, cookieParser, 'jsessionid');
 
 var ejsHelper = (function EJSHelper() {
   var
