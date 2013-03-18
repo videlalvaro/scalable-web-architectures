@@ -49,6 +49,32 @@ var ejsHelper = (function EJSHelper() {
   return self;
 })();
 
+var db = (function MySQL(_conf) {
+  var
+    _connection,
+    self = {
+      getConnection: function () {
+        if (!_connection) {
+          _connection = require('mysql').createConnection(_conf);
+        }
+        return _connection;
+      },
+      query: function (query, callback) {
+        self.getConnection();
+        _connection.connect();
+        _connection.query(query, callback);
+        _connection.end();
+      }
+    };
+  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
+  return self;
+})(process.env.VCAP_SERVICES['mysql-5.1'][0] || {credentials: {
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: 'keines'
+}});
+
 amqp.on('ready', function () {
   chatExchange = amqp.exchange('chatExchange', { type: 'fanout' });
 });
@@ -122,7 +148,7 @@ app
       return pass;
     };
     res.writeHead(200, { 'content-type': 'application/json' });
-    res.write(process.env.VCAP_SERVICES);
+    res.write(req);
     res.end('\n');
 //    require('mongodb').connect(mongodb.getUrl(), function (err, conn) {
 //      conn.collection('users', function (err, coll) {

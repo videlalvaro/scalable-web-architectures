@@ -13,6 +13,6 @@
     "redis": "*",
     "connect-redis": "*",
     "amqp": "*",
-    "mongodb": "*"
+    "mysql": "*"
   }
 }
