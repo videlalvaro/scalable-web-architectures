@@ -2,145 +2,162 @@
  * @link https://github.com/videlalvaro/rabbitpubsub/blob/master/app.js
  * @author Richard Fussenegger
  */
-require('cf-autoconfig');
 
-var port = process.env.PORT || 3000;
-var host = process.env.HOST || 'localhost';
-
-var express = require('express');
-var http = require('http');
-var path = require('path');
-var redis = require('redis');
-var amqp = require('amqp').createConnection({});
-var app = express();
-var server = http.createServer(app);
-var io = require('socket.io').listen(server);
-var chatExchange;
-var redisClient = redis.createClient();
-var RedisStore = require('connect-redis')(express);
-var sessionStore = new RedisStore({ client: redisClient });
-var cookieSecret = 'yDj9Fs7DaVVxZdZcuOh0';
-var cookieParser = express.cookieParser(cookieSecret);
-var SessionSocket = require('session.socket.io');
-var sessionSockets = new SessionSocket(io, sessionStore, cookieParser, 'jsessionid');
-var message;
-var names; // Only stored in this node instance, bad, bad, bad ...
+/**
+ * @class Helper object to render EJS views of the app.
+ * @type EJSHelper
+ */
 var ejsHelper = (function EJSHelper() {
+  'use strict';
+
   var
-    _projectTitle = 'AMQPChat',
-    _navbarPoints = [
-      { href: '/', text: 'Home' },
-      { href: '/about', text: 'About' },
-      { href: '/user', text: 'User' }
-    ],
+
+    /**
+     * The name of the app.
+     *
+     * @private
+     * @type String
+     */
+    _name = 'AMQPChat',
+
+    /**
+     * The string to use as title separator.
+     *
+     * @private
+     * @type String
+     */
+    _titleSeparator = ' | ',
+
+    /**
+     * Set alert messages to be displayed to the user, the object consists of two offsets:
+     * <ul>
+     *   <li><b>message:</b> The message to display.</li>
+     *   <li><b>type:</b> The type of message, possible values are <em>warning</em>, <em>error</em>, <em>success</em>
+     *   and <em>info</em>.</li>
+     * </ul>
+     *
+     * @private
+     * @see EJSHelper.setAlert()
+     * @type null|Object
+     */
+    _alert = null,
+
+    /**
+     * @public
+     * @type EJSHelper
+     */
     self = {
+
+      /**
+       * Generate the title for usage in the <code>&lt;title%gt;</code>-element.
+       *
+       * @syntax EJSHelper.getTitle(title = "")
+       * @public
+       * @function
+       * @param {String} title
+       *   The title of the page, defaults to empty string.
+       * @returns {String}
+       *   The title formatted for usage in the <code>&lt;title&gt;</code>-element.
+       */
       getTitle: function EJSHelperGetTitle(title) {
-        return (title ? title + ' | ' : '') + _projectTitle;
+        return (title ? title + _titleSeparator : '') + _name;
       },
-      getNavbar: function EJSHelperGetNavbar(active) {
-        for (var i = 0; i < _navbarPoints.length; i++) {
-          _navbarPoints[i].active = _navbarPoints[i].text === active || _navbarPoints[i].href === active ? ' class="active"' : '';
-        }
-        return _navbarPoints;
-      },
+
+      /**
+       * Helper function for rendering the EJS views.
+       *
+       * @syntax EJSHelper.render(res, view, options = {})
+       * @public
+       * @function
+       * @param {http.ServerResponse} res
+       *   The <code>http.ServerResponse</code> object with which we should respond the rendered view.
+       * @param {String} view
+       *   The name of the view.
+       * @param {Object} options
+       *   Options to pass to the view, predefined offsets are:
+       *   <ul>
+       *     <li><b>view:</b> The name of the view (can not be altered).</li>
+       *     <li><b>title:</b> The title of the page (passed to <code>EJSHelper.getTitle</code>).</li>
+       *     <li><b>alert:</b> Alert message to display to the user (use <code>EJSHelper.setAlert</code> to set alert
+       *     message).</li>
+       *     <li><b>options:</b> The complete options object as passed to this function.</li>
+       *   </ul>
+       * @returns {EJSHelper}
+       */
       render: function EJSHelperRender(res, view, options) {
         options = options || {};
         res.render(view, {
           view: view,
           title: self.getTitle(options.title || null),
-          navbar: self.getNavbar(options.active || null),
-          user: options.user || null,
-          message: options.message || null
+          alert: _alert,
+          options: options
         });
+        // Always reset any alert after rendering!
+        _alert = null;
+        return self;
+      },
+
+      /**
+       * Set alert message to display to the user.
+       *
+       * @syntax EJSHelper.setAlert(message, type = "warning")
+       * @public
+       * @function
+       * @param {String} message
+       *   The message to display.
+       * @param {String} type
+       *   The type of message, possible values are <em>warning</em>, <em>error</em>, <em>success</em> and
+       *   <em>info</em>. Defaults to <em>warning</em>.
+       * @returns {EJSHelper}
+       */
+      setAlert: function EJSHelperSetAlert(message, type) {
+        if (!message) return;
+        type = type || 'warning';
+        _alert = { message: message, type: type };
+        return self;
       }
+
     };
+
   return self;
 })();
 
-amqp.on('ready', function () {
-  chatExchange = amqp.exchange('chatExchange', { type: 'fanout' });
-});
-
-// Configure socket.io
-io.set('transports', [ 'xhr-polling' ]).set('log level', 1);
-
-// Configure our app and set up routes.
-app
-  .configure(function () {
+(express = require('express'))()
+  .configure(function expressAppConfigure() {
     this
-      .set('port', port)
+      .set('port', process.env.PORT)
       .set('views', __dirname + '/views')
       .set('view engine', 'ejs')
-      .use(cookieParser)
       .use(express.logger('dev'))
       .use(express.bodyParser())
       .use(express.methodOverride())
-      .use(express.session({ store: sessionStore, key: 'jsessionid', secret: cookieSecret }))
-      .use(express.static(path.join(__dirname, 'public')))
-      .use(this.router);
+      .use(express.static(require('path').join(__dirname, 'public')))
+    ;
   })
-  .configure('development', function () {
-    this.use(express.errorHandler());
-  })
-  .get('/', function (req, res) {
+  .get('/', function expressAppGetIndex(req, res) {
     var user;
     try {
       user = req.session.user;
-      res.session.regenerate(function (error) {
-        req.session.user = user;
-        ejsHelper.render(res, 'index', { active: 'Home', user: user });
-      });
+      ejsHelper.render(res, 'index');
     } catch (e) {
       res.redirect('/user');
     }
   })
-  .get('/user', function (req, res) {
-    ejsHelper.render(res, 'login', { title: 'Login', message: message });
-    message = null;
-  })
-  .post('/logout', function (req, res) {
-    res.redirect('/user');
-  })
-  .post('/login', function (req, res) {
-    // MongoDB and MySQL fail on CloudFoundry, my guess is because the node packages (npm install) are not compatible.
-    // I do not have the time to debug CloudFoundry all day. It is their responsibility to document their infrastructure
-    // correctly.
-    //
-    // @todo Check if name is already used by another user!
-    if (req.body && req.body.name) {
-      for (var i = 0; i < names.length; i++) {
-        if (names[i] === req.body.name) {
-          message = 'This name is already in use!';
-          res.redirect('/user');
-          return;
-        }
-      }
-      names.push(req.body.name);
-      req.session.name = req.body.name;
-      res.redirect('/');
+  .get('/user', function expressAppGetUser(req, res) {
+    if (req.session && req.session.user) {
+      // @todo Render user profile page.
     } else {
-      message = 'Username and/or password is wrong!';
-      res.redirect('/user');
+      ejsHelper.render(res, 'login', { title: 'Login' });
     }
   })
+  .post('/user/register', function expressAppPostUserRegister(req, res) {
+    res.json(req.body);
+  })
+  .post('/user/login', function expressAppPostUserLogin(req, res) {
+    res.json(req.body);
+  })
+  .post('/user/logout', function expressAppPostUserLogout(req, res) {
+    res.json({});
+  })
+  .listen()
 ;
-
-sessionSockets.on('connection', function (error, socket, session) {
-  socket.on('chat', function (data) {
-    var msg = JSON.parse(data);
-    chatExchange.publish('', { action: 'message', user: session.user, msg: msg.msg });
-  });
-  socket.on('join', function () {
-    chatExchange.publish('', { action: 'control', user: session.user, msg: ' joined the channel.' });
-  });
-  amqp.queue('', { exclusive: true }, function (q) {
-    q.bind('chatExchange', '');
-    q.subscribe(function (message) {
-      socket.emit('chat', JSON.stringify(message));
-    });
-  });
-});
-
-server.listen(port, function () {
-  console.log('Express server listening on port ' + port);
-});
