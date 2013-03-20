@@ -1,3 +1,3 @@
 # AMQPChat
 
-http://rfussenegger.cloudfoundry.com/
+http://amqpchat.cloudfoundry.com/
