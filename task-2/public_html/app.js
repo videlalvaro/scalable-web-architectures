@@ -2,12 +2,13 @@
  * @link https://github.com/videlalvaro/rabbitpubsub/blob/master/app.js
  * @author Richard Fussenegger
  */
+var ejsHelper, mysql, express;
 
 /**
- * @class Helper object to render EJS views of the app.
+ * @class Singleton to easily render EJS views of the app.
  * @type EJSHelper
  */
-var ejsHelper = (function EJSHelper() {
+ejsHelper = (function EJSHelper() {
   'use strict';
 
   var
@@ -111,10 +112,7 @@ var ejsHelper = (function EJSHelper() {
        * @returns {EJSHelper}
        */
       setAlert: function EJSHelperSetAlert(message, type) {
-        if (!message) return;
-        type = type || 'warning';
-        _alert = { message: message, type: type };
-        return self;
+        return message && (_alert = { message: message, type: (type || 'warning') }), self;
       }
 
     };
@@ -123,10 +121,10 @@ var ejsHelper = (function EJSHelper() {
 })();
 
 /**
- * @class MySQL database object to interact with.
+ * @class Singleton to easily interact with the MySQL database.
  * @type MySQL
  */
-var mysql = (function MySQL() {
+mysql = (function MySQL() {
   'use strict';
 
   var
@@ -154,8 +152,7 @@ var mysql = (function MySQL() {
        * @returns {MySQL}
        */
       error: function MySQLError(error) {
-        console.log(error);
-        return self;
+        return console.log(error), self;
       },
 
       /**
@@ -170,8 +167,7 @@ var mysql = (function MySQL() {
        * @returns {MySQL}
        */
       checkError: function MySQLCheckError(error, callback, callbackArg) {
-        (error && self.error(error)) || (callback && callback((callbackArg || null)));
-        return self;
+        return (error && self.error(error)) || (callback && callback((callbackArg || null))), self;
       },
 
       /**
@@ -183,7 +179,7 @@ var mysql = (function MySQL() {
        * @returns {Pool}
        */
       getPool: function MySQLGetPool() {
-        return _pool || (_pool = require('mysql').createPool(JSON.parse(process.env.VCAP_SERVICES)['mysql-5.1'][0]['credentials']));
+        return _pool || (_pool = require('mysql').createPool(JSON.parse(process.env.VCAP_SERVICES)['mysql-5.1'][0].credentials));
       },
 
       /**
@@ -251,8 +247,10 @@ var mysql = (function MySQL() {
   return self;
 })();
 
+// Create new express app instance, configure it and start listening.
 (express = require('express'))()
   .configure(function expressAppConfigure() {
+    'use strict';
     this
       .set('port', process.env.PORT)
       .set('views', __dirname + '/views')
@@ -263,7 +261,10 @@ var mysql = (function MySQL() {
       .use(express.static(require('path').join(__dirname, 'public')))
     ;
   })
+
+  // Render the index page.
   .get('/', function expressAppGetIndex(req, res) {
+    'use strict';
     var user;
     try {
       user = req.session.user;
@@ -272,21 +273,32 @@ var mysql = (function MySQL() {
       res.redirect('/user');
     }
   })
+
+  // Render the user profile or login/registration page (depends if user is logged in or not).
   .get('/user', function expressAppGetUser(req, res) {
-    if (req.session && req.session.user) {
-      // @todo Render user profile page.
-    } else {
-      ejsHelper.render(res, 'login', { title: 'Login' });
-    }
+    'use strict';
+    var view = req.session && req.session.user ? ['profile','Profile'] : ['login','Login'];
+    ejsHelper.render(res, view[0], { title: view[1] });
   })
+
+  // Register new user account with the given info.
   .post('/user/register', function expressAppPostUserRegister(req, res) {
+    'use strict';
     res.json(req.body);
   })
+
+  // Try to log the user in with the given info.
   .post('/user/login', function expressAppPostUserLogin(req, res) {
+    'use strict';
     res.json(req.body);
   })
+
+  // Log the user out if currently logged in.
   .post('/user/logout', function expressAppPostUserLogout(req, res) {
+    'use strict';
     res.json({});
   })
+
+  // Has to be the last function call (returns Server).
   .listen()
 ;
