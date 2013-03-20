@@ -122,6 +122,135 @@ var ejsHelper = (function EJSHelper() {
   return self;
 })();
 
+/**
+ * @class MySQL database object to interact with.
+ * @type MySQL
+ */
+var mysql = (function MySQL() {
+  'use strict';
+
+  var
+
+    /**
+     * Contains the MySQL connection pool
+     *
+     * @private
+     * @type Pool
+     */
+    _pool = null,
+
+    /**
+     * @public
+     * @type MySQL
+     */
+    self = {
+      /**
+       * Error handling policy.
+       *
+       * @syntax MySQL.error(error)
+       * @public
+       * @function
+       * @param {Object} error
+       * @returns {MySQL}
+       */
+      error: function MySQLError(error) {
+        console.log(error);
+        return self;
+      },
+
+      /**
+       * Check if an error occured, if not call the callback function with the given arguments.
+       *
+       * @syntax MySQL.checkError(error, callback, callbackArg = null);
+       * @public
+       * @function
+       * @param {Object} error
+       * @param {Function} callback
+       * @param {mixed} callbackArg
+       * @returns {MySQL}
+       */
+      checkError: function MySQLCheckError(error, callback, callbackArg) {
+        (error && self.error(error)) || (callback && callback((callbackArg || null)));
+        return self;
+      },
+
+      /**
+       * Get MySQL connection pool.
+       *
+       * @syntax MySQL.getPool()
+       * @public
+       * @function
+       * @returns {Pool}
+       */
+      getPool: function MySQLGetPool() {
+        return _pool || (_pool = require('mysql').createPool(JSON.parse(process.env.VCAP_SERVICES)['mysql-5.1'][0]['credentials']));
+      },
+
+      /**
+       * Get a MySQL connection from the MySQL pool.
+       *
+       * @syntax MySQL.getConnection(callback)
+       * @public
+       * @function
+       * @param {Function} callback
+       * @returns {MySQL}
+       */
+      getConnection: function MySQLGetConnection(callback) {
+        self.getPool().getConnection(function _MySQLGetConnectionCallback(error, connection) {
+          self.checkError(error, callback, connection);
+        });
+        return self;
+      },
+
+      /**
+       * Execute any query against the MySQL database.
+       *
+       * @syntax MySQL.query(query, callback)
+       * @public
+       * @function
+       * @param {String} query
+       * @param {Function} callback
+       * @returns {MySQL}
+       */
+      query: function MySQLQuery(query, callback) {
+        if (query) {
+          self.getConnection(function _GetConnectionCallback(connection) {
+            connection.query(query, function _QueryCallback(error, result) {
+              self.checkError(error, callback, result);
+            });
+          });
+        }
+        return self;
+      },
+
+      /**
+       * Execute any query against the MySQL database but auto escape the parameters.
+       *
+       * @syntax MySQL.queryEscaped(query, params, callback)
+       * @public
+       * @function
+       * @param {String} query
+       * @param {Array} params
+       * @param {Function} callback
+       * @returns {MySQL}
+       */
+      queryEscaped: function MySQLQueryEscaped(query, params, callback) {
+        if (query) {
+          self.getConnection(function _GetConnectionCallback(connection) {
+            connection.query(query, params, function _QueryCallback(error, result) {
+              self.checkError(error, callback, result);
+            });
+          });
+        }
+        return self;
+      }
+    };
+
+  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
+
+  return self;
+})();
+
 (express = require('express'))()
   .configure(function expressAppConfigure() {
     this
