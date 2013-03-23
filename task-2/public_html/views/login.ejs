@@ -11,14 +11,15 @@
     <input name="login[email]" id="login-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email you specified during registration.">
     <input name="login[password]" id="login-password" type="password" placeholder="Password" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Password we sent you after registration.">
     <button type="submit" class="btn btn-large btn-primary">Login</button>
-    <button id="btn-show-register" class="btn">Register</button>
+    <button id="btn-show-register" class="btn form-switcher">Register</button>
   </form>
   <form id="form-register" class="form-register js-hidden" action="/user/register" method="post">
     <h2 class="form-register-heading">Please register</h2>
     <input name="register[name]" id="register-name" type="text" placeholder="Chat name" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Your chat nickname.">
     <input name="register[email]" id="register-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email will be used to identify you.">
     <button type="submit" class="btn btn-large btn-primary">Register</button>
-    <button id="btn-show-login" class="btn">Login</button>
+    <button id="btn-show-login" class="btn form-switcher">Login</button>
   </form>
+  <div id="loading" class="loading js-hidden"></div>
 </div>
 <% include layout/footer %>

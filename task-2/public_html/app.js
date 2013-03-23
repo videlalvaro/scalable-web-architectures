@@ -85,10 +85,10 @@ ejsHelper = (function EJSHelper() {
        *   </ul>
        * @returns {EJSHelper}
        */
-      render: function EJSHelperRender(res, view, options) {
+      render: function EJSHelperRender(res, options) {
         options = options || {};
-        res.render(view, {
-          view: view,
+        res.render('index', {
+          view: options.view || 'chat',
           title: self.getTitle(options.title || null),
           alert: _alert,
           options: options
@@ -268,33 +268,26 @@ mysql = (function MySQL() {
     var user;
     try {
       user = req.session.user;
-      ejsHelper.render(res, 'index');
+      ejsHelper.render(res);
     } catch (e) {
-      res.redirect('/user');
+      ejsHelper.render(res, { view: 'login', title: 'Login' });
     }
   })
 
-  // Render the user profile or login/registration page (depends if user is logged in or not).
-  .get('/user', function expressAppGetUser(req, res) {
-    'use strict';
-    var view = req.session && req.session.user ? ['profile','Profile'] : ['login','Login'];
-    ejsHelper.render(res, view[0], { title: view[1] });
-  })
-
   // Register new user account with the given info.
-  .post('/user/register', function expressAppPostUserRegister(req, res) {
+  .post('/register', function expressAppPostUserRegister(req, res) {
     'use strict';
-    res.json(req.body);
+    res.json(!req.body.name || !req.body.email ? { error: true } : { pass: require('password-generator')() });
   })
 
   // Try to log the user in with the given info.
-  .post('/user/login', function expressAppPostUserLogin(req, res) {
+  .post('/login', function expressAppPostUserLogin(req, res) {
     'use strict';
     res.json(req.body);
   })
 
   // Log the user out if currently logged in.
-  .post('/user/logout', function expressAppPostUserLogout(req, res) {
+  .post('/logout', function expressAppPostUserLogout(req, res) {
     'use strict';
     res.json({});
   })
