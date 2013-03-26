@@ -18,31 +18,31 @@
   <!--[if lt IE 7]>
       <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
   <![endif]-->
-  <div class="container">
+  <div id="content" class="container">
     <% if (alert) { %>
       <div class="alert alert-block alert-<%= alert.type %> fade in">
         <button type="button" class="close" data-dismiss="alert">×</button>
         <p><%= alert.message %></p>
       </div>
     <% } %>
-    <div id="chat" class="chat js-hidden">
+    <div id="chat" class="chat js-hidden" data-title="">
       <p>Chat form :)</p>
     </div>
-    <form id="form-login" class="form-login js-hidden" action="/user/login" method="post">
+    <form id="form-login" class="form-login js-hidden" data-title="Login" action="/user/login" method="post">
       <h2 class="form-login-heading">Please login</h2>
       <input name="login[email]" id="login-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email you specified during registration.">
       <input name="login[password]" id="login-password" type="password" placeholder="Password" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Password we sent you after registration.">
       <button type="submit" class="btn btn-large btn-primary">Login</button>
-      <button id="btn-show-register" class="btn form-switcher">Register</button>
+      <button id="btn-form-register" class="btn form-switcher">Register</button>
     </form>
-    <form id="form-register" class="form-register js-hidden" action="/user/register" method="post">
+    <form id="form-register" class="form-register js-hidden" data-title="Register" action="/user/register" method="post">
       <h2 class="form-register-heading">Please register</h2>
       <input name="register[name]" id="register-name" type="text" placeholder="Chat name" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Your chat nickname.">
       <input name="register[email]" id="register-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email will be used to identify you.">
       <button type="submit" class="btn btn-large btn-primary">Register</button>
-      <button id="btn-show-login" class="btn form-switcher">Login</button>
+      <button id="btn-form-login" class="btn form-switcher">Login</button>
     </form>
-    <div id="loading" class="loading js-visible"></div>
+    <div id="loading" class="loading js-visible" data-title="Loading"></div>
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.js"><\/script>')</script>

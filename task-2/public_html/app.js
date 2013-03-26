@@ -1,4 +1,8 @@
 /**
+ * Test user is:
+ *   mail: richard@fussenegger.info
+ *   pass: pafizohufe
+ *
  * @link https://github.com/videlalvaro/rabbitpubsub/blob/master/app.js
  * @author Richard Fussenegger
  */
@@ -242,7 +246,7 @@ mysql = (function MySQL() {
       }
     };
 
-  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(255) NOT NULL, `pass` BLOB NOT NULL);');
+  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `name` VARCHAR(255) NOT NULL UNIQUE, `mail` VARCHAR(255) NOT NULL UNIQUE, `pass` VARCHAR(40) NOT NULL);');
 
   return self;
 })();
@@ -275,21 +279,47 @@ mysql = (function MySQL() {
   })
 
   // Register new user account with the given info.
-  .post('/register', function expressAppPostUserRegister(req, res) {
+  .post('/register', function expressAppPostRegister(req, res) {
     'use strict';
-    res.json(!req.body.name || !req.body.email ? { error: true } : { pass: require('password-generator')() });
+    var pass;
+    if (req.body.name && req.body.mail) {
+      mysql.queryEscaped('SELECT `id` FROM `users` WHERE `name` = ?', [req.body.name], function (result) {
+        if (result.length > 0) {
+          res.json({ error: 'The name <b>' + req.body.name + '</b> is already taken, please use another name!' });
+        } else {
+          mysql.queryEscaped('SELECT `id` FROM `users` WHERE `mail` = ?', [req.body.mail], function (result) {
+            if (result.length > 0) {
+              res.json({ error: 'The email <b>' + req.body.mail + '</b> is already taken, please use another email!' });
+            } else {
+              pass = require('password-generator')();
+              mysql.queryEscaped('INSERT INTO `users` SET `name` = ?, `mail` = ?, `pass` = SHA1(?);', [req.body.name, req.body.mail, pass], function () {
+                res.json({ pass: pass });
+              });
+            }
+          });
+        }
+      });
+    } else {
+      res.json({ error: 'Please fill out all required fields!' });
+    }
   })
 
   // Try to log the user in with the given info.
-  .post('/login', function expressAppPostUserLogin(req, res) {
+  .post('/login', function expressAppPostLogin(req, res) {
     'use strict';
-    res.json(req.body);
+    if (req.body.mail && req.body.pass) {
+      mysql.queryEscaped('SELECT `name` FROM `users` WHERE `mail` = ? AND `pass` = SHA1(?) LIMIT 1;', [req.body.mail, req.body.pass], function (result) {
+        res.json(result[0].name ? { success: true } : { error: 'Email or password is wrong, please try again!' });
+      });
+    } else {
+      res.json({ error: 'Please fill out all required fields!' });
+    }
   })
 
   // Log the user out if currently logged in.
-  .post('/logout', function expressAppPostUserLogout(req, res) {
+  .post('/logout', function expressAppPostLogout(req, res) {
     'use strict';
-    res.json({});
+    res.json({ success: true });
   })
 
   // Has to be the last function call (returns Server).
