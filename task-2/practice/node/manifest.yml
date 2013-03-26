@@ -1,0 +1,9 @@
+--- 
+applications: 
+- url: rfussenegger.${target-base}
+  path: .
+  runtime: node08
+  instances: 1
+  memory: 2G
+  name: rfussenegger
+  framework: node
