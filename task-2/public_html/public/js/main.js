@@ -1,4 +1,144 @@
 /**
+ * Extend String object with a special function to replace all occurences of special text combinations with our smileys.
+ * @syntax String.replaceSmileys()
+ * @returns {String}
+ */
+String.prototype.replaceSmileys = function () {
+  var
+    str = this + '',
+    /**
+     * @link http://www.skype-emoticons.com/
+     * @type Object
+     */
+    smileys = {
+      '(finger)': 'finger',
+      '(bandit)': 'bandit',
+      '(drunk)': 'drunk',
+      '(smoking)': 'smoking',
+      '(smoke)': 'smoking',
+      '(ci)': 'smoking',
+      '(toivo)': 'toivo',
+      '(rock)': 'rock',
+      '(headbang)': 'headbang',
+      '(banghead)': 'headbang',
+      '(bug)': 'bug',
+      '(fubar)': 'fubar',
+      '(poolparty)': 'poolparty',
+      '(swear)': 'swear',
+      '(tmi)': 'tmi',
+      '(heidy)': 'heidy',
+      '(mooning)': 'mooning',
+      ':)': 'smile',
+      ':=)': 'smile',
+      ':-)': 'smile',
+      ':(': 'sadsmile',
+      ':=(': 'sadsmile',
+      ':-(': 'sadsmile',
+      ':D': 'bigsmile',
+      ':=D': 'bigsmile',
+      ':-D': 'bigsmile',
+      ':d': 'bigsmile',
+      ':=d': 'bigsmile',
+      ':-d': 'bigsmile',
+      '8)': 'cool',
+      '8=)': 'cool',
+      '8-)': 'cool',
+      'B)': 'cool',
+      'B=)': 'cool',
+      'B-)': 'cool',
+      '(cool)': 'cool',
+      ':o': 'wink',
+      ':=o': 'wink',
+      ':-o': 'wink',
+      ':O': 'wink',
+      ':=O': 'wink',
+      ':-O': 'wink',
+      ';(': 'crying',
+      ';=(': 'crying',
+      ';-(': 'crying',
+      '(sweat)': 'sweating',
+      '(:|': 'sweating',
+      ':|': 'speechless',
+      ':=|': 'speechless',
+      ':-|': 'speechless',
+      ':*': 'kiss',
+      ':=*': 'kiss',
+      ':-*': 'kiss',
+      ':P': 'tongueout',
+      ':=P': 'tongueout',
+      ':-P': 'tongueout',
+      ':p': 'tongueout',
+      ':=p': 'tongueout',
+      ':-p': 'tongueout',
+      ':$': 'blush',
+      ':=$': 'blush',
+      ':-$': 'blush',
+      ':">': 'blush',
+      '(blush)': 'blush',
+      ':^)': 'wondering',
+      '|)': 'sleepy',
+      '|=)': 'sleepy',
+      '|-)': 'sleepy',
+      '(snooze)': 'sleepy',
+      '|(': 'dull',
+      '|=(': 'dull',
+      '|-(': 'dull',
+      '(inlove)': 'inlove',
+      ']:)': 'evilgrin',
+      '>:)': 'evilgrin',
+      '(grin)': 'evilgrin',
+      '(talk)': 'talk',
+      '(yawn)': 'yawn',
+      '|-()': 'yawn',
+      '(puke)': 'puke',
+      ':&': 'puke',
+      ':=&': 'puke',
+      ':-&': 'puke',
+      '(doh)': 'doh',
+      ':@': 'angry',
+      ':=@': 'angry',
+      ':-@': 'angry',
+      'x(': 'angry',
+      'x=(': 'angry',
+      'x-(': 'angry',
+      'X(': 'angry',
+      'X=(': 'angry',
+      'X-(': 'angry',
+      '(wasntme)': 'wasntme',
+      '(hi)': 'hi',
+      '(call)': 'call',
+      '(devil)': 'devil',
+      '(angel)': 'angel',
+      '(envy)': 'envy',
+      '(wait)': 'wait',
+      '(bear)': 'bear',
+      '(hug)': 'bear',
+      '(makeup)': 'makeup',
+      '(kate)': 'makeup',
+      '(giggle)': 'giggle',
+      '(chuckle)': 'giggle',
+      '(clap)': 'clapping',
+      '(bow)': 'bow',
+      '(rofl)': 'rofl',
+      '(whew)': 'whew',
+      '(happy)': 'happy',
+      '(smirk)': 'smirk',
+      '(nod)': 'nod',
+      '(shake)': 'shake',
+      '(punch)': 'punch',
+      '(emo)': 'emo',
+      '(y)': 'yes',
+      '(Y)': 'yes',
+      '(ok)': 'yes',
+      '(n)': 'no',
+      '(N)': 'no',
+      '(handshake)': 'handshake'
+    };
+  for (var code in smileys) str = str.split(code).join('<img src="/img/' + smileys[code] + '.gif" alt="">');
+  return str;
+};
+
+/**
  * Extend jQuery with some nice animations.
  * @param {jQuery} $
  * @returns {void}
@@ -13,7 +153,7 @@
    * @returns {jQuery.Object}
    */
   $.fn.slideUpFadeOut = function (callback) {
-    return this.stop(true, true).animate({ marginTop: -300, opacity: 'hide' }, { complete: function () {
+    return this.stop(true, true).animate({ marginTop: -340, opacity: 'hide' }, { complete: function () {
       if (callback) callback();
       $(this).toggleClass('js-hidden js-visible');
     }});
@@ -63,16 +203,34 @@ $(window).load(function () {
     pass = null,
 
     /**
-     * <code>$('#content')</code>
-     * @type jQuery.Object
-     */
-    $content = $('#content'),
-
-    /**
      * <code>$('#chat')</code>
      * @type jQuery.Object
      */
     $chat = $('#chat'),
+
+    /**
+     * <code>$('#chat-container')</code>
+     * @type jQuery.Object
+     */
+    $chatContainer = $('#chat-container'),
+
+    /**
+     * <code>$('#chat-name')</code>
+     * @type jQuery.Object
+     */
+    $chatName = $('#chat-name'),
+
+    /**
+     * <code>$('#chat-message')</code>
+     * @type jQuery.Object
+     */
+    $chatMessage = $('#chat-message'),
+
+    /**
+     * <code>$('#form-chat')</code>
+     * @type jQuery.Object
+     */
+    $formChat = $('#form-chat'),
 
     /**
      * <code>$('#form-login')</code>
@@ -104,12 +262,57 @@ $(window).load(function () {
   function setAlert(message, type) {
     if (!message) return;
     type = type || 'warning';
-    $content.prepend(
+    $('#content').prepend(
       '<div class="alert alert-block alert-' + type + ' fade in">' +
         '<button type="button" class="close" data-dismiss="alert">×</button>' +
         '<p>' + message + '</p>' +
       '</div>'
     );
+  }
+
+  /**
+   * Start chat.
+   * @returns {void}
+   */
+  function chatJoin() {
+    var userName = $chatName.text(), socketIO, intervalID, reconnectCount = 0;
+    if (userName === '') return;
+    socketIO = io.connect('http://' + window.location.host.split(':')[0], { reconnect: false, 'try multiple transports': false });
+    socketIO.on('disconnect', function () {
+      intervalID = setInterval(function () {
+        reconnectCount++;
+        if (reconnectCount === 5) clearInterval(intervalID);
+        $.ajax('/', function () {
+          socketIO.socket.reconnect();
+          clearInterval(intervalID);
+        });
+      }, 4000);
+    });
+    socketIO.on('chat', function (data) {
+      var data = JSON.parse(data);
+      switch (data.action) {
+        case 'message':
+          $chatContainer.append('<p><b>' + data.name + ':</b> ' + data.message.replaceSmileys() + '</p>');
+          break;
+        case 'join':
+          $chatContainer.append('<p><img src="/img/hi.gif" alt=""> <em>' + data.name + ' joined the chat!</em></p>');
+          break;
+        case 'left':
+          $chatContainer.append('<p><img src="/img/wave.gif" alt=""> <em>' + data.name + ' left the chat!</em></p>');
+          break;
+      }
+      $chatContainer.scrollTop($chatContainer[0].scrollHeight);
+    });
+    socketIO.emit('join', JSON.stringify({}));
+    $('#logout').click(function () {
+      socketIO.emit('left', JSON.stringify({}));
+    });
+    $formChat.submit(function () {
+      var message = $chatMessage.val();
+      if (message === '') return;
+      socketIO.emit('chat', JSON.stringify({ action: 'message', message: message }));
+      $chatMessage.val('');
+    });
   }
 
   /**
@@ -149,7 +352,8 @@ $(window).load(function () {
         $.post('/login', { mail: mail, pass: pass }, function (res) {
           $loading.slideUpFadeOut(function () {
             if (res && res.success === true) {
-              $chat.slideDownFadeIn();
+              $chatName.text(res.name);
+              $chat.slideDownFadeIn(chatJoin);
             } else {
               $formLogin.slideDownFadeIn();
               setAlert(res.error, 'error');
@@ -176,11 +380,13 @@ $(window).load(function () {
     $formRegister.slideUpFadeOut(function () {
       $loading.slideDownFadeIn(function () {
         $.post('/register', { name: name, mail: mail }, function (res) {
-          if (res && (pass = res.pass)) {
+          if (res && res.pass) {
+            pass = res.pass;
             $.post('/login', { mail: mail, pass: pass }, function (res) {
               if (res && res.success === true) {
                 $loading.slideUpFadeOut(function () {
-                  $chat.slideDownFadeIn();
+                  $chatName.text(name);
+                  $chat.slideDownFadeIn(chatJoin);
                   setAlert('You have successfully registered a new account. Please use your email and the following password in the future to log in.</p><p>Your password: <b>' + pass + '</b>', 'success');
                 });
               } else {
@@ -195,9 +401,30 @@ $(window).load(function () {
     });
   });
 
+  /**
+   * If the user hits enter we want to submit the form and insert a line break if the user hits ctrl + enter. This is
+   * the similar behaviour as other chat apps are doing it (e.g. Skype).
+   */
+  $chatMessage
+    .keydown(function (e) {
+      if (e.keyCode === 10 || e.keyCode === 13 && e.ctrlKey) {
+        $(this).val(function (i, val) {
+          return val + '\n';
+        });
+      }
+    })
+    .keypress(function (e) {
+      if (e.keyCode === 10 || e.keyCode === 13 && !e.ctrlKey) {
+        e.preventDefault();
+        $formChat.submit();
+        return false;
+      }
+    })
+  ;
+
   // Check which interface we should display at first.
   $loading.slideUpFadeOut(function () {
-    ($('body').hasClass('view-body-login') ? $formLogin : $chat).slideDownFadeIn();
+    ($('body').hasClass('view-body-login') ? $formLogin : $chat).slideDownFadeIn(chatJoin);
   });
 
   // Bind special Bootstrap jQuery extension stuff.

@@ -6,7 +6,7 @@
  * @link https://github.com/videlalvaro/rabbitpubsub/blob/master/app.js
  * @author Richard Fussenegger
  */
-var ejsHelper, mysql, express;
+var ejsHelper, mysql, redis, server, express, socketIO, sessionStore, cookieParser, cookieKey = 'jsessionid', cookieSecret = 'amqpchat', rabbitConn, chatExchange;
 
 /**
  * @class Singleton to easily render EJS views of the app.
@@ -76,8 +76,6 @@ ejsHelper = (function EJSHelper() {
        * @function
        * @param {http.ServerResponse} res
        *   The <code>http.ServerResponse</code> object with which we should respond the rendered view.
-       * @param {String} view
-       *   The name of the view.
        * @param {Object} options
        *   Options to pass to the view, predefined offsets are:
        *   <ul>
@@ -251,77 +249,129 @@ mysql = (function MySQL() {
   return self;
 })();
 
-// Create new express app instance, configure it and start listening.
-(express = require('express'))()
-  .configure(function expressAppConfigure() {
-    'use strict';
-    this
-      .set('port', process.env.PORT)
-      .set('views', __dirname + '/views')
-      .set('view engine', 'ejs')
-      .use(express.logger('dev'))
-      .use(express.bodyParser())
-      .use(express.methodOverride())
-      .use(express.static(require('path').join(__dirname, 'public')))
-    ;
-  })
+// Express 3 requires that we instantiate a http.Server to attach socket.io to first.
+server = require('http').createServer(
+  // Create new express app instance, configure it and start listening.
+  (express = require('express'))()
+    .configure(function expressAppConfigure() {
+      'use strict';
+      cookieParser = express.cookieParser(cookieSecret);
+      sessionStore = new (require('connect-redis')(express))({ client: require('redis').createClient() });
+      this
+        .set('views', __dirname + '/views')
+        .set('view engine', 'ejs')
+        .use(express.favicon())
+        .use(express.logger('dev'))
+        .use(express.bodyParser())
+        .use(express.methodOverride())
+        .use(express.static(require('path').join(__dirname, 'public')))
+        .use(cookieParser)
+        .use(express.session({ store: sessionStore, key: cookieKey, secret: cookieSecret }))
+      ;
+    })
 
-  // Render the index page.
-  .get('/', function expressAppGetIndex(req, res) {
-    'use strict';
-    var user;
-    try {
-      user = req.session.user;
-      ejsHelper.render(res);
-    } catch (e) {
-      ejsHelper.render(res, { view: 'login', title: 'Login' });
-    }
-  })
+    // Render the index page.
+    .get('/', function expressAppGetIndex(req, res) {
+      'use strict';
+      var oldSession;
+      function _renderLogin() {
+        ejsHelper.render(res, { view: 'login', title: 'Login' });
+      }
+      if (req.session && req.session.name && req.session.mail && req.session.pass) {
+        oldSession = req.session;
+        mysql.queryEscaped('SELECT `id` FROM `users` WHERE `name` = ? AND `mail` = ? AND `pass` = SHA1(?) LIMIT 1;', [req.session.name, req.session.mail, req.session.pass], function (result) {
+          if (result.length > 0) {
+            req.session.regenerate(function (err) {
+              req.session.name = oldSession.name;
+              req.session.mail = oldSession.mail;
+              req.session.pass = oldSession.pass;
+              ejsHelper.render(res, { name: req.session.name });
+            });
+          } else {
+            _renderLogin();
+          }
+        });
+      } else {
+        _renderLogin();
+      }
+    })
 
-  // Register new user account with the given info.
-  .post('/register', function expressAppPostRegister(req, res) {
-    'use strict';
-    var pass;
-    if (req.body.name && req.body.mail) {
-      mysql.queryEscaped('SELECT `id` FROM `users` WHERE `name` = ?', [req.body.name], function (result) {
-        if (result.length > 0) {
-          res.json({ error: 'The name <b>' + req.body.name + '</b> is already taken, please use another name!' });
-        } else {
-          mysql.queryEscaped('SELECT `id` FROM `users` WHERE `mail` = ?', [req.body.mail], function (result) {
-            if (result.length > 0) {
-              res.json({ error: 'The email <b>' + req.body.mail + '</b> is already taken, please use another email!' });
-            } else {
-              pass = require('password-generator')();
-              mysql.queryEscaped('INSERT INTO `users` SET `name` = ?, `mail` = ?, `pass` = SHA1(?);', [req.body.name, req.body.mail, pass], function () {
-                res.json({ pass: pass });
-              });
-            }
-          });
-        }
-      });
-    } else {
-      res.json({ error: 'Please fill out all required fields!' });
-    }
-  })
+    // Register new user account with the given info.
+    .post('/register', function expressAppPostRegister(req, res) {
+      'use strict';
+      var pass;
+      if (req.body.name && req.body.mail) {
+        mysql.queryEscaped('SELECT `id` FROM `users` WHERE `name` = ?', [req.body.name], function (result) {
+          if (result.length > 0) {
+            res.json({ error: 'The name <b>' + req.body.name + '</b> is already taken, please use another name!' });
+          } else {
+            mysql.queryEscaped('SELECT `id` FROM `users` WHERE `mail` = ?', [req.body.mail], function (result) {
+              if (result.length > 0) {
+                res.json({ error: 'The email <b>' + req.body.mail + '</b> is already taken, please use another email!' });
+              } else {
+                pass = require('password-generator')();
+                mysql.queryEscaped('INSERT INTO `users` SET `name` = ?, `mail` = ?, `pass` = SHA1(?);', [req.body.name, req.body.mail, pass], function () {
+                  res.json({ pass: pass });
+                });
+              }
+            });
+          }
+        });
+      } else {
+        res.json({ error: 'Please fill out all required fields!' });
+      }
+    })
 
-  // Try to log the user in with the given info.
-  .post('/login', function expressAppPostLogin(req, res) {
-    'use strict';
-    if (req.body.mail && req.body.pass) {
-      mysql.queryEscaped('SELECT `name` FROM `users` WHERE `mail` = ? AND `pass` = SHA1(?) LIMIT 1;', [req.body.mail, req.body.pass], function (result) {
-        res.json(result[0].name ? { success: true } : { error: 'Email or password is wrong, please try again!' });
-      });
-    } else {
-      res.json({ error: 'Please fill out all required fields!' });
-    }
-  })
+    // Try to log the user in with the given info.
+    .post('/login', function expressAppPostLogin(req, res) {
+      'use strict';
+      if (req.body.mail && req.body.pass) {
+        mysql.queryEscaped('SELECT `name` FROM `users` WHERE `mail` = ? AND `pass` = SHA1(?) LIMIT 1;', [req.body.mail, req.body.pass], function (result) {
+          if (result[0].name) {
+            req.session.name = result[0].name;
+            req.session.mail = req.body.mail;
+            req.session.pass = req.body.pass;
+            res.json({ success: true, name: result[0].name });
+          } else {
+            res.json({ error: 'Email or password is wrong, please try again!' });
+          }
+        });
+      } else {
+        res.json({ error: 'Please fill out all required fields!' });
+      }
+    })
 
-  // Log the user out if currently logged in.
-  .post('/logout', function expressAppPostLogout(req, res) {
-    'use strict';
-    res.json({ success: true });
-  })
+    // Log the user out if currently logged in.
+    .get('/logout', function expressAppPostLogout(req, res) {
+      'use strict';
+      req.session.destroy();
+      res.redirect('/');
+    })
+);
 
-  // Has to be the last function call (returns Server).
-  .listen()
-;
+socketIO = require('socket.io').listen(server).set('transports', ['xhr-polling']).set('log level', 1);
+
+server.listen(process.env.PORT);
+
+rabbitConn = require('amqp').createConnection({}).on('ready', function () {
+  chatExchange = this.exchange('chatExchange', { type: 'fanout' });
+});
+
+new (require('session.socket.io'))(socketIO, sessionStore, cookieParser, cookieKey).on('connection', function (error, socket, session) {
+  socket.on('chat', function (data) {
+    chatExchange.publish('', { action: 'message', name: session.name, message: (JSON.parse(data)).message });
+  });
+  socket.on('join', function () {
+    chatExchange.publish('', { action: 'join', name: session.name });
+  });
+  socket.on('left', function () {
+    chatExchange.publish('', { action: 'left', name: session.name });
+  });
+  rabbitConn.queue('', { exclusive: true }, function (queue) {
+    queue.bind('chatExchange', '');
+    // We can not chain this, seems like AMQP is not programmed very well.
+    queue.subscribe(function (data) {
+      socket.emit('chat', JSON.stringify(data));
+    });
+  });
+});

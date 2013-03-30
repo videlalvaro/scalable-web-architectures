@@ -26,27 +26,38 @@
       </div>
     <% } %>
     <div id="chat" class="chat js-hidden" data-title="">
-      <p>Chat form :)</p>
+      <div id="chat-container" class="well well-large"></div>
+      <form id="form-chat" class="form-chat clearfix" action="/chat" method="post">
+        <p>You are logged in as <b id="chat-name"><% if (options && options.name) { %><%= options.name %><% } %></b>, write something:</p>
+        <textarea name="chat[message]" id="chat-message" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Write your chat message here and click the submit button."></textarea>
+        <div id="chat-controls" class="clearfix">
+          <button type="submit" class="pull-left btn btn-large btn-primary">Submit</button>
+          <a id="logout" class="pull-right" href="/logout">Logout</a>
+        </div>
+      </form>
     </div>
-    <form id="form-login" class="form-login js-hidden" data-title="Login" action="/user/login" method="post">
-      <h2 class="form-login-heading">Please login</h2>
-      <input name="login[email]" id="login-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email you specified during registration.">
-      <input name="login[password]" id="login-password" type="password" placeholder="Password" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Password we sent you after registration.">
-      <button type="submit" class="btn btn-large btn-primary">Login</button>
-      <button id="btn-form-register" class="btn form-switcher">Register</button>
-    </form>
-    <form id="form-register" class="form-register js-hidden" data-title="Register" action="/user/register" method="post">
-      <h2 class="form-register-heading">Please register</h2>
-      <input name="register[name]" id="register-name" type="text" placeholder="Chat name" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Your chat nickname.">
-      <input name="register[email]" id="register-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email will be used to identify you.">
-      <button type="submit" class="btn btn-large btn-primary">Register</button>
-      <button id="btn-form-login" class="btn form-switcher">Login</button>
-    </form>
-    <div id="loading" class="loading js-visible" data-title="Loading"></div>
+    <div id="spacer">
+      <form id="form-login" class="form-login js-hidden" data-title="Login" action="/login" method="post">
+        <h2 class="form-login-heading">Please login</h2>
+        <input name="login[email]" id="login-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email you specified during registration.">
+        <input name="login[password]" id="login-password" type="password" placeholder="Password" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Password we sent you after registration.">
+        <button type="submit" class="btn btn-large btn-primary">Login</button>
+        <button type="button" id="btn-form-register" class="btn form-switcher">Register</button>
+      </form>
+      <form id="form-register" class="form-register js-hidden" data-title="Register" action="/register" method="post">
+        <h2 class="form-register-heading">Please register</h2>
+        <input name="register[name]" id="register-name" type="text" placeholder="Chat name" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Your chat nickname.">
+        <input name="register[email]" id="register-email" type="email" placeholder="Email address" class="input-block-level" required="required" data-toggle="tooltip" data-placement="right" title="Email will be used to identify you.">
+        <button type="submit" class="btn btn-large btn-primary">Register</button>
+        <button type="button" id="btn-form-login" class="btn form-switcher">Login</button>
+      </form>
+      <div id="loading" class="loading js-visible" data-title="Loading"></div>
+    </div>
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.js"><\/script>')</script>
   <script src="js/vendor/bootstrap.min.js"></script>
+  <script src="js/libs/socket.io-0.9.10/socket.io.min.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,164 @@
+{
+  "name": "rfussenegger",
+  "version": "0.0.1",
+  "dependencies": {
+    "ejs": {
+      "version": "0.8.3",
+      "from": "https://registry.npmjs.org/ejs/-/ejs-0.8.3.tgz"
+    },
+    "express": {
+      "version": "3.1.0",
+      "from": "https://registry.npmjs.org/express/-/express-3.1.0.tgz",
+      "dependencies": {
+        "connect": {
+          "version": "2.7.2",
+          "dependencies": {
+            "qs": {
+              "version": "0.5.1"
+            },
+            "formidable": {
+              "version": "1.0.11"
+            },
+            "bytes": {
+              "version": "0.1.0"
+            },
+            "pause": {
+              "version": "0.0.1"
+            }
+          }
+        },
+        "commander": {
+          "version": "0.6.1"
+        },
+        "range-parser": {
+          "version": "0.0.4"
+        },
+        "mkdirp": {
+          "version": "0.3.3"
+        },
+        "cookie": {
+          "version": "0.0.5"
+        },
+        "buffer-crc32": {
+          "version": "0.1.1"
+        },
+        "fresh": {
+          "version": "0.1.0"
+        },
+        "methods": {
+          "version": "0.0.1"
+        },
+        "send": {
+          "version": "0.1.0",
+          "dependencies": {
+            "mime": {
+              "version": "1.2.6"
+            }
+          }
+        },
+        "cookie-signature": {
+          "version": "0.0.1"
+        },
+        "debug": {
+          "version": "0.7.2"
+        }
+      }
+    },
+    "mysql": {
+      "version": "2.0.0-alpha7",
+      "from": "https://registry.npmjs.org/mysql/-/mysql-2.0.0-alpha7.tgz",
+      "dependencies": {
+        "require-all": {
+          "version": "0.0.3"
+        },
+        "bignumber.js": {
+          "version": "1.0.1"
+        }
+      }
+    },
+    "redis": {
+      "version": "0.8.2",
+      "from": "https://registry.npmjs.org/redis/-/redis-0.8.2.tgz"
+    },
+    "connect-redis": {
+      "version": "1.4.5",
+      "from": "https://registry.npmjs.org/connect-redis/-/connect-redis-1.4.5.tgz",
+      "dependencies": {
+        "redis": {
+          "version": "0.7.3"
+        },
+        "debug": {
+          "version": "0.7.2"
+        }
+      }
+    },
+    "password-generator": {
+      "version": "0.2.0",
+      "from": "https://registry.npmjs.org/password-generator/-/password-generator-0.2.0.tgz",
+      "dependencies": {
+        "optimist": {
+          "version": "0.3.5",
+          "dependencies": {
+            "wordwrap": {
+              "version": "0.0.2"
+            }
+          }
+        }
+      }
+    },
+    "socket.io": {
+      "version": "0.9.14",
+      "dependencies": {
+        "socket.io-client": {
+          "version": "0.9.11",
+          "dependencies": {
+            "uglify-js": {
+              "version": "1.2.5"
+            },
+            "ws": {
+              "version": "0.4.25",
+              "dependencies": {
+                "commander": {
+                  "version": "0.6.1"
+                },
+                "tinycolor": {
+                  "version": "0.0.1"
+                },
+                "options": {
+                  "version": "0.0.3"
+                }
+              }
+            },
+            "xmlhttprequest": {
+              "version": "1.4.2"
+            },
+            "active-x-obfuscator": {
+              "version": "0.0.1",
+              "dependencies": {
+                "zeparser": {
+                  "version": "0.0.5"
+                }
+              }
+            }
+          }
+        },
+        "policyfile": {
+          "version": "0.0.4"
+        },
+        "base64id": {
+          "version": "0.1.0"
+        },
+        "redis": {
+          "version": "0.7.3"
+        }
+      }
+    },
+    "session.socket.io": {
+      "version": "0.1.6",
+      "from": "https://github.com/functioncallback/session.socket.io/archive/master.tar.gz"
+    },
+    "amqp": {
+      "version": "0.1.6"
+    }
+  }
+}
