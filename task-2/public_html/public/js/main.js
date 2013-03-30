@@ -1,140 +1,163 @@
 /**
+ * Global AMQPChat object, contains settings and utility methods.
+ * @type Object
+ */
+var AMQPChat = AMQPChat || {};
+
+/**
+ * Get the name of the app.
+ * @type String
+ */
+AMQPChat.toString = 'AMQPChat';
+
+/**
+ * @link http://www.skype-emoticons.com/
+ * @type Object
+ */
+AMQPChat.smileys = {
+  '(finger)': 'finger',
+  '(bandit)': 'bandit',
+  '(drunk)': 'drunk',
+  '(smoking)': 'smoking',
+  '(smoke)': 'smoking',
+  '(ci)': 'smoking',
+  '(toivo)': 'toivo',
+  '(rock)': 'rock',
+  '(headbang)': 'headbang',
+  '(banghead)': 'headbang',
+  '(bug)': 'bug',
+  '(fubar)': 'fubar',
+  '(poolparty)': 'poolparty',
+  '(swear)': 'swear',
+  '(tmi)': 'tmi',
+  '(heidy)': 'heidy',
+  '(mooning)': 'mooning',
+  ':)': 'smile',
+  ':=)': 'smile',
+  ':-)': 'smile',
+  ':(': 'sadsmile',
+  ':=(': 'sadsmile',
+  ':-(': 'sadsmile',
+  ':D': 'bigsmile',
+  ':=D': 'bigsmile',
+  ':-D': 'bigsmile',
+  ':d': 'bigsmile',
+  ':=d': 'bigsmile',
+  ':-d': 'bigsmile',
+  '8)': 'cool',
+  '8=)': 'cool',
+  '8-)': 'cool',
+  'B)': 'cool',
+  'B=)': 'cool',
+  'B-)': 'cool',
+  '(cool)': 'cool',
+  ':o': 'wink',
+  ':=o': 'wink',
+  ':-o': 'wink',
+  ':O': 'wink',
+  ':=O': 'wink',
+  ':-O': 'wink',
+  ';(': 'crying',
+  ';=(': 'crying',
+  ';-(': 'crying',
+  '(sweat)': 'sweating',
+  '(:|': 'sweating',
+  ':|': 'speechless',
+  ':=|': 'speechless',
+  ':-|': 'speechless',
+  ':*': 'kiss',
+  ':=*': 'kiss',
+  ':-*': 'kiss',
+  ':P': 'tongueout',
+  ':=P': 'tongueout',
+  ':-P': 'tongueout',
+  ':p': 'tongueout',
+  ':=p': 'tongueout',
+  ':-p': 'tongueout',
+  ':$': 'blush',
+  ':=$': 'blush',
+  ':-$': 'blush',
+  ':">': 'blush',
+  '(blush)': 'blush',
+  ':^)': 'wondering',
+  '|)': 'sleepy',
+  '|=)': 'sleepy',
+  '|-)': 'sleepy',
+  '(snooze)': 'sleepy',
+  '|(': 'dull',
+  '|=(': 'dull',
+  '|-(': 'dull',
+  '(inlove)': 'inlove',
+  ']:)': 'evilgrin',
+  '>:)': 'evilgrin',
+  '(grin)': 'evilgrin',
+  '(talk)': 'talk',
+  '(yawn)': 'yawn',
+  '|-()': 'yawn',
+  '(puke)': 'puke',
+  ':&': 'puke',
+  ':=&': 'puke',
+  ':-&': 'puke',
+  '(doh)': 'doh',
+  ':@': 'angry',
+  ':=@': 'angry',
+  ':-@': 'angry',
+  'x(': 'angry',
+  'x=(': 'angry',
+  'x-(': 'angry',
+  'X(': 'angry',
+  'X=(': 'angry',
+  'X-(': 'angry',
+  '(wasntme)': 'wasntme',
+  '(hi)': 'hi',
+  '(call)': 'call',
+  '(devil)': 'devil',
+  '(angel)': 'angel',
+  '(envy)': 'envy',
+  '(wait)': 'wait',
+  '(bear)': 'bear',
+  '(hug)': 'bear',
+  '(makeup)': 'makeup',
+  '(kate)': 'makeup',
+  '(giggle)': 'giggle',
+  '(chuckle)': 'giggle',
+  '(clap)': 'clapping',
+  '(bow)': 'bow',
+  '(rofl)': 'rofl',
+  '(whew)': 'whew',
+  '(happy)': 'happy',
+  '(smirk)': 'smirk',
+  '(nod)': 'nod',
+  '(shake)': 'shake',
+  '(punch)': 'punch',
+  '(emo)': 'emo',
+  '(y)': 'yes',
+  '(Y)': 'yes',
+  '(ok)': 'yes',
+  '(n)': 'no',
+  '(N)': 'no',
+  '(handshake)': 'handshake'
+};
+
+/**
+ * Get the <code>img</code>-element for the smiley identified by <em>code</code>.
+ * @syntax AMQPChat.getSmiley(code)
+ * @see AMQPChat.smileys
+ * @param {String} code
+ * @returns {String}
+ */
+AMQPChat.getSmiley = function (code) {
+  return '<img src="/img/' + AMQPChat.smileys[code] + '.gif" alt="" width="19" height="19">';
+};
+
+/**
  * Extend String object with a special function to replace all occurences of special text combinations with our smileys.
  * @syntax String.replaceSmileys()
  * @returns {String}
  */
 String.prototype.replaceSmileys = function () {
-  var
-    str = this + '',
-    /**
-     * @link http://www.skype-emoticons.com/
-     * @type Object
-     */
-    smileys = {
-      '(finger)': 'finger',
-      '(bandit)': 'bandit',
-      '(drunk)': 'drunk',
-      '(smoking)': 'smoking',
-      '(smoke)': 'smoking',
-      '(ci)': 'smoking',
-      '(toivo)': 'toivo',
-      '(rock)': 'rock',
-      '(headbang)': 'headbang',
-      '(banghead)': 'headbang',
-      '(bug)': 'bug',
-      '(fubar)': 'fubar',
-      '(poolparty)': 'poolparty',
-      '(swear)': 'swear',
-      '(tmi)': 'tmi',
-      '(heidy)': 'heidy',
-      '(mooning)': 'mooning',
-      ':)': 'smile',
-      ':=)': 'smile',
-      ':-)': 'smile',
-      ':(': 'sadsmile',
-      ':=(': 'sadsmile',
-      ':-(': 'sadsmile',
-      ':D': 'bigsmile',
-      ':=D': 'bigsmile',
-      ':-D': 'bigsmile',
-      ':d': 'bigsmile',
-      ':=d': 'bigsmile',
-      ':-d': 'bigsmile',
-      '8)': 'cool',
-      '8=)': 'cool',
-      '8-)': 'cool',
-      'B)': 'cool',
-      'B=)': 'cool',
-      'B-)': 'cool',
-      '(cool)': 'cool',
-      ':o': 'wink',
-      ':=o': 'wink',
-      ':-o': 'wink',
-      ':O': 'wink',
-      ':=O': 'wink',
-      ':-O': 'wink',
-      ';(': 'crying',
-      ';=(': 'crying',
-      ';-(': 'crying',
-      '(sweat)': 'sweating',
-      '(:|': 'sweating',
-      ':|': 'speechless',
-      ':=|': 'speechless',
-      ':-|': 'speechless',
-      ':*': 'kiss',
-      ':=*': 'kiss',
-      ':-*': 'kiss',
-      ':P': 'tongueout',
-      ':=P': 'tongueout',
-      ':-P': 'tongueout',
-      ':p': 'tongueout',
-      ':=p': 'tongueout',
-      ':-p': 'tongueout',
-      ':$': 'blush',
-      ':=$': 'blush',
-      ':-$': 'blush',
-      ':">': 'blush',
-      '(blush)': 'blush',
-      ':^)': 'wondering',
-      '|)': 'sleepy',
-      '|=)': 'sleepy',
-      '|-)': 'sleepy',
-      '(snooze)': 'sleepy',
-      '|(': 'dull',
-      '|=(': 'dull',
-      '|-(': 'dull',
-      '(inlove)': 'inlove',
-      ']:)': 'evilgrin',
-      '>:)': 'evilgrin',
-      '(grin)': 'evilgrin',
-      '(talk)': 'talk',
-      '(yawn)': 'yawn',
-      '|-()': 'yawn',
-      '(puke)': 'puke',
-      ':&': 'puke',
-      ':=&': 'puke',
-      ':-&': 'puke',
-      '(doh)': 'doh',
-      ':@': 'angry',
-      ':=@': 'angry',
-      ':-@': 'angry',
-      'x(': 'angry',
-      'x=(': 'angry',
-      'x-(': 'angry',
-      'X(': 'angry',
-      'X=(': 'angry',
-      'X-(': 'angry',
-      '(wasntme)': 'wasntme',
-      '(hi)': 'hi',
-      '(call)': 'call',
-      '(devil)': 'devil',
-      '(angel)': 'angel',
-      '(envy)': 'envy',
-      '(wait)': 'wait',
-      '(bear)': 'bear',
-      '(hug)': 'bear',
-      '(makeup)': 'makeup',
-      '(kate)': 'makeup',
-      '(giggle)': 'giggle',
-      '(chuckle)': 'giggle',
-      '(clap)': 'clapping',
-      '(bow)': 'bow',
-      '(rofl)': 'rofl',
-      '(whew)': 'whew',
-      '(happy)': 'happy',
-      '(smirk)': 'smirk',
-      '(nod)': 'nod',
-      '(shake)': 'shake',
-      '(punch)': 'punch',
-      '(emo)': 'emo',
-      '(y)': 'yes',
-      '(Y)': 'yes',
-      '(ok)': 'yes',
-      '(n)': 'no',
-      '(N)': 'no',
-      '(handshake)': 'handshake'
-    };
-  for (var code in smileys) str = str.split(code).join('<img src="/img/' + smileys[code] + '.gif" alt="">');
+  var str = this + '';
+  for (var code in AMQPChat.smileys) str = str.split(code).join(AMQPChat.getSmiley(code));
   return str;
 };
 
@@ -167,7 +190,7 @@ String.prototype.replaceSmileys = function () {
    */
   $.fn.slideDownFadeIn = function (callback) {
     var title = this.data('title');
-    document.title = (title && title !== '' ? title + ' | ' : '') + 'AMQPChat';
+    document.title = (title && title !== '' ? title + ' | ' : '') + AMQPChat.toString;
     return this.stop(true, true).animate({ marginTop: 0, opacity: 'show' }, { complete: function () {
       if (callback) callback();
       $(this).toggleClass('js-hidden js-visible');
@@ -275,8 +298,7 @@ $(window).load(function () {
    * @returns {void}
    */
   function chatJoin() {
-    var userName = $chatName.text(), socketIO, intervalID, reconnectCount = 0;
-    if (userName === '') return;
+    var socketIO, intervalID, reconnectCount = 0;
     socketIO = io.connect('http://' + window.location.host.split(':')[0], { reconnect: false, 'try multiple transports': false });
     socketIO.on('disconnect', function () {
       intervalID = setInterval(function () {
@@ -289,28 +311,22 @@ $(window).load(function () {
       }, 4000);
     });
     socketIO.on('chat', function (data) {
-      var data = JSON.parse(data);
-      switch (data.action) {
-        case 'message':
-          $chatContainer.append('<p><b>' + data.name + ':</b> ' + data.message.replaceSmileys() + '</p>');
-          break;
-        case 'join':
-          $chatContainer.append('<p><img src="/img/hi.gif" alt=""> <em>' + data.name + ' joined the chat!</em></p>');
-          break;
-        case 'left':
-          $chatContainer.append('<p><img src="/img/wave.gif" alt=""> <em>' + data.name + ' left the chat!</em></p>');
-          break;
+      data = JSON.parse(data);
+      if (data.action === 'message') {
+        $chatContainer.append('<p><b>' + data.name + ':</b> ' + data.message.replaceSmileys() + '</p>');
+      } else if (data.action === 'system') {
+        $chatContainer.append('<p>' + AMQPChat.getSmiley('(hi)') + ' <em>' + data.name + data.message + '</em></p>');
       }
       $chatContainer.scrollTop($chatContainer[0].scrollHeight);
     });
-    socketIO.emit('join', JSON.stringify({}));
+    socketIO.emit('joined');
     $('#logout').click(function () {
-      socketIO.emit('left', JSON.stringify({}));
+      socketIO.emit('left');
     });
     $formChat.submit(function () {
       var message = $chatMessage.val();
       if (message === '') return;
-      socketIO.emit('chat', JSON.stringify({ action: 'message', message: message }));
+      socketIO.send(message);
       $chatMessage.val('');
     });
   }
@@ -385,9 +401,10 @@ $(window).load(function () {
             $.post('/login', { mail: mail, pass: pass }, function (res) {
               if (res && res.success === true) {
                 $loading.slideUpFadeOut(function () {
+                  var $registered = $('#registered');
                   $chatName.text(name);
-                  $chat.slideDownFadeIn(chatJoin);
-                  setAlert('You have successfully registered a new account. Please use your email and the following password in the future to log in.</p><p>Your password: <b>' + pass + '</b>', 'success');
+                  $('#pass').text(pass);
+                  $registered.slideDownFadeIn(chatJoin); // Start the chat right away!
                 });
               } else {
                 _registerError(res.error);
@@ -424,8 +441,13 @@ $(window).load(function () {
 
   // Check which interface we should display at first.
   $loading.slideUpFadeOut(function () {
-    ($('body').hasClass('view-body-login') ? $formLogin : $chat).slideDownFadeIn(chatJoin);
+    ((name = $chatName.text()) === '' ? $formLogin : $chat).slideDownFadeIn(chatJoin);
   });
+
+  // Preload all smileys.
+  for (var code in AMQPChat.smileys) {
+    (new Image()).src = '/img/' + AMQPChat.smileys[code] + '.gif';
+  }
 
   // Bind special Bootstrap jQuery extension stuff.
   $('.alert').alert();

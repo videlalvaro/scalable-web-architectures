@@ -1,15 +1,17 @@
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
+*{-moz-box-sizing:border-box;-ms-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+body{padding:40px 0}
 html,body,#content,#chat{height:100%;background-color:#f5f5f5}
-#chat,#chat-container,#form-chat{-moz-box-sizing:border-box;-ms-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
-#chat{padding:40px 0}
-#chat-container{padding:20px;height:80%;background-color:#fff;overflow-y:scroll}
-#chat-message{resize:none}
-#form-chat{height:20%}
-#spacer{padding-top:40px}
-#loading,.form-login,.form-register{max-width:300px;padding:19px 29px 29px;margin:0 auto 20px;background-color:#fff;border:1px solid #e5e5e5;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;-webkit-box-shadow:0 1px 2px rgba(0,0,0,.05);-moz-box-shadow:0 1px 2px rgba(0,0,0,.05);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+#chat-container{margin:0;padding:20px;height:80%;background-color:#fff;overflow-y:scroll}
+#chat-controls{width:18%;text-align:right}
+#chat-message{width:80%;height:100%;resize:none}
+#form-chat{margin:0;height:20%;min-height:50px;padding-top:20px}
+.text-container{max-width:300px;padding:19px 29px 29px;margin:0 auto 20px;background-color:#fff;border:1px solid #e5e5e5;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;-webkit-box-shadow:0 1px 2px rgba(0,0,0,.05);-moz-box-shadow:0 1px 2px rgba(0,0,0,.05);box-shadow:0 1px 2px rgba(0,0,0,.05)}
 #loading{min-height:64px;background:no-repeat center url(/img/loading.gif) #fff}
+#registered em{color:#999}
 .form-login .form-login-heading,.form-register .form-register-heading{margin-bottom:10px}
 .form-login .input-block-level,.form-register .input-block-level{font-size:16px;height:auto;margin-bottom:15px;padding:7px 9px}
 .js-hidden{margin-top:-340px;display:none}
+.you{color:#fa6900}
