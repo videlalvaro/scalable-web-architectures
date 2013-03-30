@@ -16,13 +16,136 @@ var
    * @class Singleton to easily interact with the MySQL database.
    * @type MySQL
    */
-  mysql,
+  mysql = (function MySQL() {
+    var
+
+      /**
+       * Contains the MySQL connection pool
+       *
+       * @private
+       * @type Pool
+       */
+      _pool = null,
+
+      /**
+       * @public
+       * @type MySQL
+       */
+      self = {
+        /**
+         * Error handling policy.
+         *
+         * @syntax MySQL.error(error)
+         * @public
+         * @function
+         * @param {Object} error
+         * @returns {MySQL}
+         */
+        error: function MySQLError(error) {
+          return console.log(error), self;
+        },
+
+        /**
+         * Check if an error occured, if not call the callback function with the given arguments.
+         *
+         * @syntax MySQL.checkError(error, callback, callbackArg = null);
+         * @public
+         * @function
+         * @param {Object} error
+         * @param {Function} callback
+         * @param {mixed} callbackArg
+         * @returns {MySQL}
+         */
+        checkError: function MySQLCheckError(error, callback, callbackArg) {
+          return (error && self.error(error)) || (callback && callback((callbackArg || null))), self;
+        },
+
+        /**
+         * Get MySQL connection pool.
+         *
+         * @syntax MySQL.getPool()
+         * @public
+         * @function
+         * @returns {Pool}
+         */
+        getPool: function MySQLGetPool() {
+          return _pool || (_pool = require('mysql').createPool(JSON.parse(process.env.VCAP_SERVICES)['mysql-5.1'][0].credentials));
+        },
+
+        /**
+         * Get a MySQL connection from the MySQL pool.
+         *
+         * @syntax MySQL.getConnection(callback)
+         * @public
+         * @function
+         * @param {Function} callback
+         * @returns {MySQL}
+         */
+        getConnection: function MySQLGetConnection(callback) {
+          self.getPool().getConnection(function _MySQLGetConnectionCallback(error, connection) {
+            self.checkError(error, callback, connection);
+          });
+          return self;
+        },
+
+        /**
+         * Execute any query against the MySQL database.
+         *
+         * @syntax MySQL.query(query, callback)
+         * @public
+         * @function
+         * @param {String} query
+         * @param {Function} callback
+         * @returns {MySQL}
+         */
+        query: function MySQLQuery(query, callback) {
+          if (query) {
+            self.getConnection(function _GetConnectionCallback(connection) {
+              connection.query(query, function _QueryCallback(error, result) {
+                self.checkError(error, callback, result);
+              });
+            });
+          }
+          return self;
+        },
+
+        /**
+         * Execute any query against the MySQL database but auto escape the parameters.
+         *
+         * @syntax MySQL.queryEscaped(query, params, callback)
+         * @public
+         * @function
+         * @param {String} query
+         * @param {Array} params
+         * @param {Function} callback
+         * @returns {MySQL}
+         */
+        queryEscaped: function MySQLQueryEscaped(query, params, callback) {
+          if (query) {
+            self.getConnection(function _GetConnectionCallback(connection) {
+              connection.query(query, params, function _QueryCallback(error, result) {
+                self.checkError(error, callback, result);
+              });
+            });
+          }
+          return self;
+        }
+      };
+    // Create the table if it does not exist yet.
+    self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `name` VARCHAR(255) NOT NULL UNIQUE, `mail` VARCHAR(255) NOT NULL UNIQUE, `pass` VARCHAR(40) NOT NULL);');
+    return self;
+  })(),
 
   /**
-   * nodejs redis instance.
-   * @type Redis
+   * nodejs socket.io instance.
+   * @type socket.io
    */
-  redis,
+  socketIO,
+
+  /**
+   * @link http://adamnengland.wordpress.com/2013/01/30/node-js-cluster-with-socket-io-and-express-3/
+   */
+  socketRedis = require('socket.io/node_modules/redis'),
 
   /**
    * nodejs http server instance.
@@ -34,25 +157,19 @@ var
    * nodejs express instance.
    * @type Express
    */
-  express,
-
-  /**
-   * nodejs socket.io instance.
-   * @type socket.io
-   */
-  socketIO,
+  express = require('express'),
 
   /**
    * Redis database for storing sessions.
    * @type Redis.storage
    */
-  sessionStore,
+  sessionStore = new (require('connect-redis')(express))({ client: require('redis').createClient() }),
 
   /**
    * Express cookie parser.
    * @type Express.cookieParser
    */
-  cookieParser,
+  cookieParser = express.cookieParser(cookieSecret),
 
   /**
    * The cookie key (defined by CloudFoundry).
@@ -67,146 +184,25 @@ var
   cookieSecret = 'amqpchat',
 
   /**
-   * nodejs amqp instance.
-   * @type amqp
-   */
-  rabbitConn,
-
-  /**
    * nodejs amqp exchange instance.
    * @type amqp.exchange
    */
-  chatExchange;
+  chatExchange,
 
-// Directly create instance of MySQL (Singleton \w module pattern).
-mysql = (function MySQL() {
-  var
-
-    /**
-     * Contains the MySQL connection pool
-     *
-     * @private
-     * @type Pool
-     */
-    _pool = null,
-
-    /**
-     * @public
-     * @type MySQL
-     */
-    self = {
-      /**
-       * Error handling policy.
-       *
-       * @syntax MySQL.error(error)
-       * @public
-       * @function
-       * @param {Object} error
-       * @returns {MySQL}
-       */
-      error: function MySQLError(error) {
-        return console.log(error), self;
-      },
-
-      /**
-       * Check if an error occured, if not call the callback function with the given arguments.
-       *
-       * @syntax MySQL.checkError(error, callback, callbackArg = null);
-       * @public
-       * @function
-       * @param {Object} error
-       * @param {Function} callback
-       * @param {mixed} callbackArg
-       * @returns {MySQL}
-       */
-      checkError: function MySQLCheckError(error, callback, callbackArg) {
-        return (error && self.error(error)) || (callback && callback((callbackArg || null))), self;
-      },
-
-      /**
-       * Get MySQL connection pool.
-       *
-       * @syntax MySQL.getPool()
-       * @public
-       * @function
-       * @returns {Pool}
-       */
-      getPool: function MySQLGetPool() {
-        return _pool || (_pool = require('mysql').createPool(JSON.parse(process.env.VCAP_SERVICES)['mysql-5.1'][0].credentials));
-      },
-
-      /**
-       * Get a MySQL connection from the MySQL pool.
-       *
-       * @syntax MySQL.getConnection(callback)
-       * @public
-       * @function
-       * @param {Function} callback
-       * @returns {MySQL}
-       */
-      getConnection: function MySQLGetConnection(callback) {
-        self.getPool().getConnection(function _MySQLGetConnectionCallback(error, connection) {
-          self.checkError(error, callback, connection);
-        });
-        return self;
-      },
-
-      /**
-       * Execute any query against the MySQL database.
-       *
-       * @syntax MySQL.query(query, callback)
-       * @public
-       * @function
-       * @param {String} query
-       * @param {Function} callback
-       * @returns {MySQL}
-       */
-      query: function MySQLQuery(query, callback) {
-        if (query) {
-          self.getConnection(function _GetConnectionCallback(connection) {
-            connection.query(query, function _QueryCallback(error, result) {
-              self.checkError(error, callback, result);
-            });
-          });
-        }
-        return self;
-      },
-
-      /**
-       * Execute any query against the MySQL database but auto escape the parameters.
-       *
-       * @syntax MySQL.queryEscaped(query, params, callback)
-       * @public
-       * @function
-       * @param {String} query
-       * @param {Array} params
-       * @param {Function} callback
-       * @returns {MySQL}
-       */
-      queryEscaped: function MySQLQueryEscaped(query, params, callback) {
-        if (query) {
-          self.getConnection(function _GetConnectionCallback(connection) {
-            connection.query(query, params, function _QueryCallback(error, result) {
-              self.checkError(error, callback, result);
-            });
-          });
-        }
-        return self;
-      }
-    };
-  // Create the table if it does not exist yet.
-  self.query('CREATE TABLE IF NOT EXISTS `users` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `name` VARCHAR(255) NOT NULL UNIQUE, `mail` VARCHAR(255) NOT NULL UNIQUE, `pass` VARCHAR(40) NOT NULL);');
-  return self;
-})();
+  /**
+   * nodejs amqp instance.
+   * @type amqp
+   */
+  rabbitConn = require('amqp').createConnection({}).on('ready', function () {
+    chatExchange = this.exchange('chatExchange', { type: 'fanout' });
+  });
 
 // Express 3 requires that we instantiate a http.Server to attach socket.io to first.
 (socketIO = require('socket.io').listen(
   (server = require('http').createServer(
     // Create new express app instance, configure it and start listening.
-    (express = require('express'))()
+    express()
       .configure(function expressAppConfigure() {
-        cookieParser = express.cookieParser(cookieSecret);
-        sessionStore = new (require('connect-redis')(express))({ client: require('redis').createClient() });
         this
           .set('views', __dirname + '/views')
           .set('view engine', 'ejs')
@@ -291,13 +287,16 @@ mysql = (function MySQL() {
         res.redirect('/');
       })
   ))
-)).set('transports', ['xhr-polling']).set('log level', 1);
+))
+.set('store', new (require('socket.io/lib/stores/redis'))({
+  redisPub: socketRedis.createClient(),
+  redisSub: socketRedis.createClient(),
+  redisClient: socketRedis.createClient()
+}))
+.set('transports', ['xhr-polling'])
+.set('log level', 1);
 
 server.listen(process.env.PORT);
-
-rabbitConn = require('amqp').createConnection({}).on('ready', function () {
-  chatExchange = this.exchange('chatExchange', { type: 'fanout' });
-});
 
 new (require('session.socket.io'))(socketIO, sessionStore, cookieParser, cookieKey).on('connection', function (error, socket, session) {
   var events = ['message', 'joined', 'left'];
