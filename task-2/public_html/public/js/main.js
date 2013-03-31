@@ -299,7 +299,11 @@ $(window).load(function () {
    */
   function chatJoin() {
     var socketIO, intervalID, reconnectCount = 0;
+
     socketIO = io.connect('http://' + window.location.host.split(':')[0], { reconnect: false, 'try multiple transports': false });
+
+    socketIO.emit('joined');
+
     socketIO.on('disconnect', function () {
       intervalID = setInterval(function () {
         reconnectCount++;
@@ -310,6 +314,7 @@ $(window).load(function () {
         });
       }, 4000);
     });
+
     socketIO.on('chat', function (data) {
       data = JSON.parse(data);
       if (data.action === 'message') {
@@ -319,10 +324,11 @@ $(window).load(function () {
       }
       $chatContainer.scrollTop($chatContainer[0].scrollHeight);
     });
-    socketIO.emit('joined');
+
     $('#logout').click(function () {
       socketIO.emit('left');
     });
+
     $formChat.submit(function () {
       var message = $chatMessage.val();
       if (message === '') return;
@@ -441,7 +447,7 @@ $(window).load(function () {
 
   // Check which interface we should display at first.
   $loading.slideUpFadeOut(function () {
-    ((name = $chatName.text()) === '' ? $formLogin : $chat).slideDownFadeIn(chatJoin);
+    (name = $chatName.text()) === '' ? $formLogin.slideDownFadeIn() : $chat.slideDownFadeIn(chatJoin);
   });
 
   // Preload all smileys.

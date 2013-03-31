@@ -166,12 +166,6 @@ var
   sessionStore = new (require('connect-redis')(express))({ client: require('redis').createClient() }),
 
   /**
-   * Express cookie parser.
-   * @type Express.cookieParser
-   */
-  cookieParser = express.cookieParser(cookieSecret),
-
-  /**
    * The cookie key (defined by CloudFoundry).
    * @type String
    */
@@ -182,6 +176,12 @@ var
    * @type String
    */
   cookieSecret = 'amqpchat',
+
+  /**
+   * Express cookie parser.
+   * @type Express.cookieParser
+   */
+  cookieParser = express.cookieParser(cookieSecret),
 
   /**
    * nodejs amqp exchange instance.
@@ -289,6 +289,7 @@ var
   ))
 ))
 .set('store', new (require('socket.io/lib/stores/redis'))({
+  redis: socketRedis,
   redisPub: socketRedis.createClient(),
   redisSub: socketRedis.createClient(),
   redisClient: socketRedis.createClient()
@@ -299,19 +300,20 @@ var
 server.listen(process.env.PORT);
 
 new (require('session.socket.io'))(socketIO, sessionStore, cookieParser, cookieKey).on('connection', function (error, socket, session) {
-  var events = ['message', 'joined', 'left'];
   if (error) console.log(error);
-  for (var i = 0; i < events.length; i++) {
-    (function _bindSocket(event) {
-      socket.on(event, function (message) {
-        chatExchange.publish('', {
-          action: event === 'message' ? 'message' : 'system',
-          name: session.name,
-          message: message.split(session.name).join('<b class="you">' + session.name + '</b>') || ' ' + event + ' the chat!'
-        });
-      });
-    })(events[i]);
-  }
+
+  socket.on('message', function (message) {
+    chatExchange.publish('', { action: 'message', name: session.name, message: message.split(session.name).join('<b class="you">' + session.name + '</b>') });
+  });
+
+  socket.on('joined', function () {
+    chatExchange.publish('', { action: 'system', name: session.name, message: ' joined the chat!' });
+  });
+
+  socket.on('left', function () {
+    chatExchange.publish('', { action: 'system', name: session.name, message: ' left the chat!' });
+  });
+
   rabbitConn.queue('', { exclusive: true }, function (queue) {
     // We can not chain this (poorly programmed?)!
     queue.bind('chatExchange', '');
