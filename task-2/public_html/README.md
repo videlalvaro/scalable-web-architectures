@@ -21,5 +21,28 @@ been nice, but one needs an SMTP to do so via Cloud Foundry; I could have used m
 crucial for the application to send mails and did not implement it), a working login and a very robust chat. It is a
 single page app and the complete view logic is present in the clients JavaScript.
 
+To deploy the app to Cloud Foundry I created a small node.js script that combines all JS and CSS files and optimizes /
+minifies them to a single file, plus using a cache buster (the timestamp of the creation of the file). After that a
+`index.ejs` is created using the cache buster timestamp. To deploy the app one has to do the following:
+
+```shell
+$ node deploy.js
+$ vmc push
+```
+
+I am using the following technologies within my app:
+* Backend:
+    * node.js (+ password generator + glob)
+    * express.js (+ ejs)
+    * MySQL
+    * Redis (+ connect-redis)
+    * Socket.IO (+ session.socket.io)
+    * AMQP
+    * CSSO
+    * UglifyJS2
+* Frontend:
+    * Socket.IO
+    * jQuery
+
 You can find it online at [amqpchat.cloudfoundry.com](http://amqpchat.cloudfoundry.com/) and if it is not working it is
-most likely a Cloud Foundry problem (as I had so many).
+most likely a Cloud Foundry problem (as I had so many). Most of the time a simple refresh of the page will do the trick.
