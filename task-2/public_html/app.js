@@ -210,7 +210,8 @@ var
           .use(express.logger('dev'))
           .use(express.bodyParser())
           .use(express.methodOverride())
-          .use(express.static(require('path').join(__dirname, 'public')))
+          .use(express.compress())
+          .use(express.static(require('path').join(__dirname, 'public'), { maxAge: 2628000 }))
           .use(cookieParser)
           .use(express.session({ store: sessionStore, key: cookieKey, secret: cookieSecret }))
         ;
