@@ -7,7 +7,7 @@ Cloud Foundry. I also encountered various problems where I was not able to conti
 Foundry was down or mysterious errors were thrown for two or three days and than they simply went away for no apparent
 reason. My final architecture looks like the following:
 
-![Final app architecture](https://raw.github.com/Fleshgrinder/scalable-web-architectures/master/task-2/img/app-architecture.svg)
+![Final app architecture](https://raw.github.com/Fleshgrinder/scalable-web-architectures/master/task-2/public_html/readme-pics/app-architecture.svg)
 
 The most significant change in comparison to the app that was created in the tutorial is the fact that this chat is
 really scalable. The problem with the original app was, that the sockets from Socket.IO were not shared among all app
