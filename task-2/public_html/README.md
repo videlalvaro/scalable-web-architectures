@@ -43,6 +43,9 @@ I am using the following technologies within my app:
 * Frontend:
     * Socket.IO
     * jQuery
+    * Bootstrap
+    * Modernizr (+ respond.js)
+    * Skype emoticons
 
 You can find it online at [amqpchat.cloudfoundry.com](http://amqpchat.cloudfoundry.com/) and if it is not working it is
 most likely a Cloud Foundry problem (as I had so many). Most of the time a simple refresh of the page will do the trick.
